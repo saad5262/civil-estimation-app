@@ -1,0 +1,3870 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+  <meta name="description" content="Civil Estimation Suite — Professional offline BOQ and quantity estimation tool by Engineer Saad & Syeda Mehwish" />
+  <meta name="theme-color" content="#0b0f1a" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="Civil Estimation Suite" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <title>Civil Estimation Suite</title>
+  <link rel="manifest" href="manifest.json" />
+
+  <!-- jsPDF + AutoTable: Local Offline Bundle with CDN Fallback -->
+  <script src="libs/jspdf.umd.min.js"></script>
+  <script>
+    if (typeof window.jspdf === 'undefined') {
+      document.write('<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js" crossorigin="anonymous"><\/script>');
+    }
+  </script>
+  <script src="libs/jspdf.plugin.autotable.min.js"></script>
+  <script>
+    if (!window.jspdf || !window.jspdf.jsPDF || !window.jspdf.jsPDF.API || !window.jspdf.jsPDF.API.autoTable) {
+      document.write('<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js" crossorigin="anonymous"><\/script>');
+    }
+  </script>
+
+  <style>
+    /* ═══════════════════════════════════════════════════
+       DESIGN SYSTEM — CSS CUSTOM PROPERTIES
+    ═══════════════════════════════════════════════════ */
+    :root {
+      --font-sans: 'Segoe UI', system-ui, -apple-system, sans-serif;
+      --font-mono: 'Consolas', 'Courier New', monospace;
+      --radius-sm: 6px;
+      --radius-md: 10px;
+      --radius-lg: 16px;
+      --radius-xl: 24px;
+      --shadow-sm: 0 1px 3px rgba(0,0,0,.12), 0 1px 2px rgba(0,0,0,.24);
+      --shadow-md: 0 4px 6px rgba(0,0,0,.16), 0 2px 4px rgba(0,0,0,.24);
+      --shadow-lg: 0 10px 25px rgba(0,0,0,.25), 0 5px 10px rgba(0,0,0,.22);
+      --transition: all .2s cubic-bezier(.4,0,.2,1);
+      --transition-slow: all .4s cubic-bezier(.4,0,.2,1);
+    }
+
+    /* DARK THEME */
+    [data-theme="dark"] {
+      --bg-base:       #0b0f1a;
+      --bg-surface:    #111827;
+      --bg-elevated:   #1a2238;
+      --bg-card:       #1e2a42;
+      --bg-input:      #0f1929;
+      --bg-hover:      #243050;
+      --border:        #2a3a5c;
+      --border-focus:  #3b82f6;
+      --text-primary:  #f0f4ff;
+      --text-secondary:#94a3b8;
+      --text-muted:    #64748b;
+      --accent-blue:   #3b82f6;
+      --accent-cyan:   #06b6d4;
+      --accent-amber:  #f59e0b;
+      --accent-green:  #10b981;
+      --accent-red:    #ef4444;
+      --accent-purple: #8b5cf6;
+      --accent-orange: #f97316;
+      --gradient-hero: linear-gradient(135deg, #0b0f1a 0%, #111827 50%, #1a2238 100%);
+      --gradient-card: linear-gradient(145deg, #1e2a42, #1a2238);
+      --gradient-accent: linear-gradient(135deg, #3b82f6, #06b6d4);
+      --gradient-gold: linear-gradient(135deg, #f59e0b, #f97316);
+      --scrollbar-track: #111827;
+      --scrollbar-thumb: #2a3a5c;
+    }
+
+    /* LIGHT THEME */
+    [data-theme="light"] {
+      --bg-base:       #f0f4ff;
+      --bg-surface:    #ffffff;
+      --bg-elevated:   #f8faff;
+      --bg-card:       #ffffff;
+      --bg-input:      #f1f5f9;
+      --bg-hover:      #e8eeff;
+      --border:        #cbd5e1;
+      --border-focus:  #3b82f6;
+      --text-primary:  #0f172a;
+      --text-secondary:#475569;
+      --text-muted:    #94a3b8;
+      --accent-blue:   #2563eb;
+      --accent-cyan:   #0891b2;
+      --accent-amber:  #d97706;
+      --accent-green:  #059669;
+      --accent-red:    #dc2626;
+      --accent-purple: #7c3aed;
+      --accent-orange: #ea580c;
+      --gradient-hero: linear-gradient(135deg, #f0f4ff 0%, #e8eeff 50%, #dbeafe 100%);
+      --gradient-card: linear-gradient(145deg, #ffffff, #f8faff);
+      --gradient-accent: linear-gradient(135deg, #2563eb, #0891b2);
+      --gradient-gold: linear-gradient(135deg, #d97706, #ea580c);
+      --scrollbar-track: #f1f5f9;
+      --scrollbar-thumb: #cbd5e1;
+    }
+
+    /* ═══════════════════════════════════════════════════
+       RESET & BASE
+    ═══════════════════════════════════════════════════ */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: var(--font-sans);
+      background: var(--bg-base);
+      color: var(--text-primary);
+      min-height: 100vh;
+      line-height: 1.6;
+      transition: var(--transition-slow);
+      overflow-x: hidden;
+    }
+
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-track { background: var(--scrollbar-track); }
+    ::-webkit-scrollbar-thumb { background: var(--scrollbar-thumb); border-radius: 3px; }
+
+    /* ═══════════════════════════════════════════════════
+       SPLASH MODAL
+    ═══════════════════════════════════════════════════ */
+    #splash-overlay {
+      position: fixed; inset: 0; z-index: 9999;
+      background: rgba(0,0,0,.85);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      display: flex; align-items: center; justify-content: center;
+      animation: fadeIn .5s ease;
+    }
+
+    #splash-overlay.hidden { display: none; }
+
+    .splash-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-xl);
+      padding: 48px 52px;
+      max-width: 520px;
+      width: 90%;
+      text-align: center;
+      box-shadow: var(--shadow-lg), 0 0 80px rgba(59,130,246,.15);
+      animation: slideUp .5s cubic-bezier(.34,1.56,.64,1);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .splash-card::before {
+      content: '';
+      position: absolute;
+      top: -2px; left: -2px; right: -2px; height: 4px;
+      background: var(--gradient-accent);
+      border-radius: var(--radius-xl) var(--radius-xl) 0 0;
+    }
+
+    .splash-logo-wrap {
+      width: 80px; height: 80px;
+      margin: 0 auto 24px;
+      background: var(--gradient-accent);
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 36px;
+      box-shadow: 0 0 30px rgba(59,130,246,.4);
+    }
+
+    .splash-title {
+      font-size: 1.75rem;
+      font-weight: 800;
+      background: var(--gradient-accent);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: 8px;
+      letter-spacing: -.02em;
+    }
+
+    .splash-subtitle {
+      font-size: .95rem;
+      color: var(--text-secondary);
+      margin-bottom: 28px;
+      line-height: 1.7;
+    }
+
+    .splash-badge {
+      display: inline-flex; align-items: center; gap: 6px;
+      background: rgba(59,130,246,.12);
+      border: 1px solid rgba(59,130,246,.25);
+      border-radius: 99px;
+      padding: 6px 14px;
+      font-size: .8rem;
+      color: var(--accent-blue);
+      margin-bottom: 28px;
+      font-weight: 600;
+    }
+
+    .splash-divider {
+      height: 1px;
+      background: var(--border);
+      margin: 24px 0;
+    }
+
+    .splash-enter-btn {
+      width: 100%;
+      padding: 14px 28px;
+      background: var(--gradient-accent);
+      color: #fff;
+      border: none;
+      border-radius: var(--radius-md);
+      font-size: 1rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: var(--transition);
+      letter-spacing: .04em;
+      box-shadow: 0 4px 20px rgba(59,130,246,.35);
+    }
+
+    .splash-enter-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 28px rgba(59,130,246,.5);
+    }
+
+    .splash-dont-show {
+      display: flex; align-items: center; justify-content: center; gap: 8px;
+      margin-top: 16px;
+      cursor: pointer;
+      font-size: .84rem;
+      color: var(--text-muted);
+      user-select: none;
+    }
+
+    .splash-dont-show input[type="checkbox"] {
+      accent-color: var(--accent-blue);
+      width: 15px; height: 15px;
+    }
+
+    /* ═══════════════════════════════════════════════════
+       ABOUT MODAL
+    ═══════════════════════════════════════════════════ */
+    .modal-overlay {
+      position: fixed; inset: 0; z-index: 8888;
+      background: rgba(0,0,0,.7);
+      backdrop-filter: blur(10px);
+      display: flex; align-items: center; justify-content: center;
+      opacity: 0; pointer-events: none;
+      transition: var(--transition);
+    }
+
+    .modal-overlay.active { opacity: 1; pointer-events: all; }
+
+    .modal-box {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-xl);
+      padding: 40px;
+      max-width: 620px;
+      width: 93%;
+      max-height: 90vh;
+      overflow-y: auto;
+      box-shadow: var(--shadow-lg);
+      transform: scale(.95) translateY(20px);
+      transition: var(--transition);
+      position: relative;
+    }
+
+    .modal-overlay.active .modal-box {
+      transform: scale(1) translateY(0);
+    }
+
+    .modal-close {
+      position: absolute; top: 16px; right: 16px;
+      background: var(--bg-elevated);
+      border: 1px solid var(--border);
+      border-radius: 50%;
+      width: 36px; height: 36px;
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer;
+      color: var(--text-secondary);
+      font-size: 18px;
+      transition: var(--transition);
+    }
+
+    .modal-close:hover { background: var(--accent-red); color: #fff; border-color: var(--accent-red); }
+
+    .dev-card {
+      background: var(--bg-elevated);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 24px;
+      margin-bottom: 16px;
+      display: flex;
+      gap: 20px;
+      align-items: flex-start;
+    }
+
+    .dev-avatar {
+      width: 64px; height: 64px; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 28px;
+      flex-shrink: 0;
+    }
+
+    .dev-avatar.blue { background: linear-gradient(135deg, #3b82f6, #06b6d4); }
+    .dev-avatar.purple { background: linear-gradient(135deg, #8b5cf6, #ec4899); }
+
+    .dev-name { font-size: 1.05rem; font-weight: 700; margin-bottom: 4px; }
+    .dev-role { font-size: .82rem; color: var(--accent-blue); font-weight: 600; margin-bottom: 8px; }
+    .dev-bio { font-size: .85rem; color: var(--text-secondary); line-height: 1.65; }
+
+    .must-badge {
+      background: var(--gradient-gold);
+      color: #fff;
+      padding: 16px 20px;
+      border-radius: var(--radius-md);
+      text-align: center;
+      font-size: .88rem;
+      font-weight: 600;
+      margin-top: 20px;
+    }
+
+    /* ═══════════════════════════════════════════════════
+       NAVBAR
+    ═══════════════════════════════════════════════════ */
+    .navbar {
+      background: var(--bg-surface);
+      border-bottom: 1px solid var(--border);
+      padding: 0 24px;
+      height: 64px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: sticky; top: 0; z-index: 500;
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      box-shadow: var(--shadow-sm);
+    }
+
+    .nav-brand {
+      display: flex; align-items: center; gap: 12px;
+      text-decoration: none;
+      color: var(--text-primary);
+    }
+
+    .nav-logo {
+      width: 38px; height: 38px;
+      background: var(--gradient-accent);
+      border-radius: var(--radius-sm);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 20px;
+      box-shadow: 0 2px 12px rgba(59,130,246,.3);
+    }
+
+    .nav-title {
+      font-size: 1.05rem;
+      font-weight: 800;
+      background: var(--gradient-accent);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      letter-spacing: -.02em;
+    }
+
+    .nav-subtitle {
+      font-size: .7rem;
+      color: var(--text-muted);
+      font-weight: 500;
+    }
+
+    .nav-actions {
+      display: flex; align-items: center; gap: 8px;
+    }
+
+    .nav-btn {
+      display: flex; align-items: center; gap: 6px;
+      padding: 8px 14px;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--border);
+      background: var(--bg-elevated);
+      color: var(--text-secondary);
+      font-size: .82rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: var(--transition);
+      text-decoration: none;
+      white-space: nowrap;
+    }
+
+    .nav-btn:hover { background: var(--bg-hover); color: var(--text-primary); border-color: var(--accent-blue); }
+
+    .nav-btn.accent {
+      background: var(--gradient-accent);
+      color: #fff;
+      border-color: transparent;
+      box-shadow: 0 2px 12px rgba(59,130,246,.3);
+    }
+
+    .nav-btn.accent:hover { box-shadow: 0 4px 20px rgba(59,130,246,.45); transform: translateY(-1px); }
+
+    /* Theme toggle */
+    .theme-toggle {
+      width: 36px; height: 36px;
+      background: var(--bg-elevated);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer;
+      font-size: 16px;
+      transition: var(--transition);
+    }
+
+    .theme-toggle:hover { background: var(--bg-hover); border-color: var(--accent-blue); }
+
+    /* Hamburger */
+    .hamburger {
+      display: none;
+      flex-direction: column; gap: 4px;
+      cursor: pointer; padding: 8px;
+      background: none; border: none;
+    }
+
+    .hamburger span {
+      display: block; width: 22px; height: 2px;
+      background: var(--text-secondary);
+      border-radius: 2px;
+      transition: var(--transition);
+    }
+
+    /* ═══════════════════════════════════════════════════
+       SIDEBAR + LAYOUT
+    ═══════════════════════════════════════════════════ */
+    .app-layout {
+      display: flex;
+      min-height: calc(100vh - 64px);
+    }
+
+    .sidebar {
+      width: 240px;
+      flex-shrink: 0;
+      background: var(--bg-surface);
+      border-right: 1px solid var(--border);
+      padding: 20px 12px;
+      position: sticky;
+      top: 64px;
+      height: calc(100vh - 64px);
+      overflow-y: auto;
+      transition: var(--transition-slow);
+    }
+
+    .sidebar-section-label {
+      font-size: .68rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: .12em;
+      color: var(--text-muted);
+      padding: 8px 8px 6px;
+      margin-top: 12px;
+    }
+
+    .sidebar-item {
+      display: flex; align-items: center; gap: 10px;
+      padding: 10px 12px;
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      font-size: .88rem;
+      font-weight: 500;
+      color: var(--text-secondary);
+      transition: var(--transition);
+      border: 1px solid transparent;
+      margin-bottom: 2px;
+      user-select: none;
+    }
+
+    .sidebar-item:hover { background: var(--bg-hover); color: var(--text-primary); }
+
+    .sidebar-item.active {
+      background: rgba(59,130,246,.12);
+      border-color: rgba(59,130,246,.25);
+      color: var(--accent-blue);
+      font-weight: 600;
+    }
+
+    .sidebar-item .icon {
+      font-size: 16px;
+      width: 22px;
+      text-align: center;
+    }
+
+    .sidebar-badge {
+      margin-left: auto;
+      background: var(--accent-blue);
+      color: #fff;
+      font-size: .65rem;
+      font-weight: 700;
+      padding: 2px 7px;
+      border-radius: 99px;
+    }
+
+    /* ═══════════════════════════════════════════════════
+       MAIN CONTENT
+    ═══════════════════════════════════════════════════ */
+    .main-content {
+      flex: 1;
+      padding: 28px;
+      overflow-x: hidden;
+      min-width: 0;
+    }
+
+    /* ═══════════════════════════════════════════════════
+       SECTION PANELS
+    ═══════════════════════════════════════════════════ */
+    .section-panel {
+      display: none;
+    }
+
+    .section-panel.active {
+      display: block;
+      animation: fadeIn .3s ease;
+    }
+
+    /* ═══════════════════════════════════════════════════
+       CARDS
+    ═══════════════════════════════════════════════════ */
+    .card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 24px;
+      margin-bottom: 20px;
+      box-shadow: var(--shadow-sm);
+      transition: var(--transition);
+    }
+
+    .card:hover { box-shadow: var(--shadow-md); }
+
+    .card-header {
+      display: flex; align-items: center; gap: 12px;
+      margin-bottom: 20px;
+      padding-bottom: 16px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .card-icon {
+      width: 42px; height: 42px;
+      border-radius: var(--radius-md);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 20px;
+      flex-shrink: 0;
+    }
+
+    .card-icon.blue   { background: rgba(59,130,246,.15); }
+    .card-icon.cyan   { background: rgba(6,182,212,.15); }
+    .card-icon.amber  { background: rgba(245,158,11,.15); }
+    .card-icon.green  { background: rgba(16,185,129,.15); }
+    .card-icon.purple { background: rgba(139,92,246,.15); }
+    .card-icon.orange { background: rgba(249,115,22,.15); }
+    .card-icon.red    { background: rgba(239,68,68,.15); }
+
+    .card-title { font-size: 1rem; font-weight: 700; margin-bottom: 2px; }
+    .card-desc  { font-size: .78rem; color: var(--text-muted); }
+
+    /* ═══════════════════════════════════════════════════
+       FORM CONTROLS
+    ═══════════════════════════════════════════════════ */
+    .form-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 16px;
+      margin-bottom: 20px;
+    }
+
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .form-group.full { grid-column: 1 / -1; }
+
+    label {
+      font-size: .8rem;
+      font-weight: 600;
+      color: var(--text-secondary);
+      letter-spacing: .02em;
+    }
+
+    label .unit-hint {
+      font-weight: 400;
+      color: var(--text-muted);
+    }
+
+    input[type="text"],
+    input[type="number"],
+    select,
+    textarea {
+      background: var(--bg-input);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 10px 14px;
+      font-size: .9rem;
+      color: var(--text-primary);
+      font-family: var(--font-sans);
+      transition: var(--transition);
+      outline: none;
+      width: 100%;
+    }
+
+    input:focus, select:focus, textarea:focus {
+      border-color: var(--border-focus);
+      box-shadow: 0 0 0 3px rgba(59,130,246,.12);
+      background: var(--bg-card);
+    }
+
+    input.invalid, select.invalid {
+      border-color: var(--accent-red);
+      box-shadow: 0 0 0 3px rgba(239,68,68,.12);
+    }
+
+    .error-msg {
+      font-size: .75rem;
+      color: var(--accent-red);
+      display: none;
+    }
+
+    .error-msg.visible { display: block; }
+
+    select option { background: var(--bg-surface); }
+
+    /* ═══════════════════════════════════════════════════
+       BUTTONS
+    ═══════════════════════════════════════════════════ */
+    .btn {
+      display: inline-flex; align-items: center; gap: 8px;
+      padding: 11px 22px;
+      border-radius: var(--radius-sm);
+      border: none;
+      font-size: .88rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: var(--transition);
+      letter-spacing: .02em;
+      white-space: nowrap;
+    }
+
+    .btn-primary {
+      background: var(--gradient-accent);
+      color: #fff;
+      box-shadow: 0 3px 14px rgba(59,130,246,.3);
+    }
+
+    .btn-primary:hover { box-shadow: 0 5px 22px rgba(59,130,246,.5); transform: translateY(-1px); }
+
+    .btn-secondary {
+      background: var(--bg-elevated);
+      border: 1px solid var(--border);
+      color: var(--text-primary);
+    }
+
+    .btn-secondary:hover { background: var(--bg-hover); border-color: var(--accent-blue); }
+
+    .btn-success {
+      background: linear-gradient(135deg, #10b981, #059669);
+      color: #fff;
+      box-shadow: 0 3px 14px rgba(16,185,129,.3);
+    }
+
+    .btn-success:hover { box-shadow: 0 5px 22px rgba(16,185,129,.5); transform: translateY(-1px); }
+
+    .btn-danger {
+      background: linear-gradient(135deg, #ef4444, #dc2626);
+      color: #fff;
+    }
+
+    .btn-danger:hover { transform: translateY(-1px); }
+
+    .btn-amber {
+      background: var(--gradient-gold);
+      color: #fff;
+      box-shadow: 0 3px 14px rgba(245,158,11,.3);
+    }
+
+    .btn-amber:hover { box-shadow: 0 5px 22px rgba(245,158,11,.5); transform: translateY(-1px); }
+
+    .btn-group {
+      display: flex; flex-wrap: wrap; gap: 10px;
+      margin-top: 20px;
+    }
+
+    .btn-sm {
+      padding: 7px 14px;
+      font-size: .78rem;
+    }
+
+    /* ═══════════════════════════════════════════════════
+       RESULTS PANEL
+    ═══════════════════════════════════════════════════ */
+    .result-panel {
+      background: var(--bg-elevated);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 20px;
+      margin-top: 20px;
+      display: none;
+    }
+
+    .result-panel.visible { display: block; animation: slideUp .3s ease; }
+
+    .result-panel-header {
+      display: flex; align-items: center; gap: 8px;
+      font-size: .9rem;
+      font-weight: 700;
+      color: var(--accent-green);
+      margin-bottom: 16px;
+    }
+
+    .result-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 12px;
+    }
+
+    .result-item {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 14px 16px;
+      transition: var(--transition);
+    }
+
+    .result-item:hover { border-color: var(--accent-blue); }
+
+    .result-label {
+      font-size: .73rem;
+      color: var(--text-muted);
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: .08em;
+      margin-bottom: 4px;
+    }
+
+    .result-value {
+      font-size: 1.35rem;
+      font-weight: 800;
+      color: var(--text-primary);
+      font-family: var(--font-mono);
+    }
+
+    .result-unit {
+      font-size: .78rem;
+      color: var(--text-muted);
+      font-weight: 500;
+      margin-left: 4px;
+    }
+
+    .result-accent { color: var(--accent-blue); }
+    .result-green  { color: var(--accent-green); }
+    .result-amber  { color: var(--accent-amber); }
+    .result-cyan   { color: var(--accent-cyan); }
+    .result-purple { color: var(--accent-purple); }
+    .result-orange { color: var(--accent-orange); }
+
+    /* ═══════════════════════════════════════════════════
+       UNIT TOGGLE
+    ═══════════════════════════════════════════════════ */
+    .unit-toggle-wrap {
+      display: flex; align-items: center; gap: 10px;
+      margin-bottom: 20px;
+    }
+
+    .unit-toggle-label { font-size: .82rem; color: var(--text-muted); font-weight: 600; }
+
+    .toggle-group {
+      display: flex;
+      background: var(--bg-input);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 3px;
+      gap: 3px;
+    }
+
+    .toggle-opt {
+      padding: 5px 14px;
+      border-radius: 4px;
+      font-size: .8rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: var(--transition);
+      color: var(--text-muted);
+      border: none;
+      background: none;
+    }
+
+    .toggle-opt.active {
+      background: var(--accent-blue);
+      color: #fff;
+      box-shadow: 0 2px 8px rgba(59,130,246,.3);
+    }
+
+    /* ═══════════════════════════════════════════════════
+       BOQ TABLE
+    ═══════════════════════════════════════════════════ */
+    .boq-table-wrap {
+      overflow-x: auto;
+      border-radius: var(--radius-md);
+      border: 1px solid var(--border);
+      margin-top: 16px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: .85rem;
+    }
+
+    thead tr {
+      background: var(--bg-elevated);
+    }
+
+    th {
+      padding: 12px 14px;
+      text-align: left;
+      font-weight: 700;
+      font-size: .75rem;
+      text-transform: uppercase;
+      letter-spacing: .08em;
+      color: var(--text-muted);
+      border-bottom: 1px solid var(--border);
+      white-space: nowrap;
+    }
+
+    td {
+      padding: 11px 14px;
+      border-bottom: 1px solid var(--border);
+      color: var(--text-primary);
+      vertical-align: middle;
+    }
+
+    tr:last-child td { border-bottom: none; }
+
+    tbody tr:hover { background: var(--bg-hover); }
+
+    .td-number { font-family: var(--font-mono); text-align: right; }
+    .td-input { padding: 6px 10px; }
+
+    td input[type="number"],
+    td input[type="text"] {
+      width: 100%; min-width: 90px;
+      padding: 7px 10px;
+      font-size: .84rem;
+      border-radius: var(--radius-sm);
+    }
+
+    /* ═══════════════════════════════════════════════════
+       COST SUMMARY PANEL
+    ═══════════════════════════════════════════════════ */
+    .cost-summary {
+      background: var(--bg-elevated);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 24px;
+      margin-top: 20px;
+    }
+
+    .cost-row {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 10px 0;
+      border-bottom: 1px solid var(--border);
+      font-size: .9rem;
+    }
+
+    .cost-row:last-child { border-bottom: none; }
+    .cost-label { color: var(--text-secondary); font-weight: 500; }
+    .cost-value { font-family: var(--font-mono); font-weight: 700; color: var(--text-primary); }
+
+    .cost-grand-total {
+      background: var(--gradient-accent);
+      color: #fff;
+      border-radius: var(--radius-md);
+      padding: 16px 20px;
+      margin-top: 16px;
+      display: flex; justify-content: space-between; align-items: center;
+    }
+
+    .cost-grand-label { font-size: 1rem; font-weight: 700; }
+    .cost-grand-value { font-size: 1.4rem; font-weight: 800; font-family: var(--font-mono); }
+
+    /* ═══════════════════════════════════════════════════
+       DASHBOARD / HOME
+    ═══════════════════════════════════════════════════ */
+    .hero-banner {
+      background: var(--gradient-hero);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-xl);
+      padding: 36px 40px;
+      margin-bottom: 28px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .hero-banner::after {
+      content: '🏗️';
+      position: absolute;
+      right: 40px; top: 50%;
+      transform: translateY(-50%);
+      font-size: 90px;
+      opacity: .08;
+    }
+
+    .hero-tag {
+      display: inline-flex; align-items: center; gap: 6px;
+      background: rgba(59,130,246,.12);
+      border: 1px solid rgba(59,130,246,.25);
+      border-radius: 99px;
+      padding: 4px 12px;
+      font-size: .75rem;
+      font-weight: 700;
+      color: var(--accent-blue);
+      text-transform: uppercase;
+      letter-spacing: .08em;
+      margin-bottom: 14px;
+    }
+
+    .hero-title {
+      font-size: 2rem;
+      font-weight: 900;
+      line-height: 1.2;
+      margin-bottom: 10px;
+      letter-spacing: -.03em;
+    }
+
+    .hero-title span {
+      background: var(--gradient-accent);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .hero-desc {
+      font-size: .92rem;
+      color: var(--text-secondary);
+      max-width: 480px;
+      line-height: 1.7;
+    }
+
+    .module-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 16px;
+      margin-bottom: 28px;
+    }
+
+    .module-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 20px;
+      cursor: pointer;
+      transition: var(--transition);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .module-card::before {
+      content: '';
+      position: absolute;
+      bottom: 0; left: 0; right: 0; height: 3px;
+      opacity: 0;
+      transition: var(--transition);
+    }
+
+    .module-card:hover { transform: translateY(-4px); box-shadow: var(--shadow-md); border-color: var(--accent-blue); }
+    .module-card:hover::before { opacity: 1; }
+
+    .module-card.c-blue::before   { background: linear-gradient(90deg, #3b82f6, #06b6d4); }
+    .module-card.c-amber::before  { background: linear-gradient(90deg, #f59e0b, #f97316); }
+    .module-card.c-green::before  { background: linear-gradient(90deg, #10b981, #06b6d4); }
+    .module-card.c-purple::before { background: linear-gradient(90deg, #8b5cf6, #ec4899); }
+    .module-card.c-orange::before { background: linear-gradient(90deg, #f97316, #ef4444); }
+    .module-card.c-cyan::before   { background: linear-gradient(90deg, #06b6d4, #3b82f6); }
+
+    .module-icon { font-size: 28px; margin-bottom: 12px; }
+    .module-name { font-size: .92rem; font-weight: 700; margin-bottom: 4px; }
+    .module-info { font-size: .78rem; color: var(--text-muted); }
+
+    /* Stats bar */
+    .stats-row {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+      gap: 14px;
+      margin-bottom: 28px;
+    }
+
+    .stat-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 16px 18px;
+    }
+
+    .stat-label { font-size: .72rem; color: var(--text-muted); font-weight: 600; text-transform: uppercase; letter-spacing: .08em; margin-bottom: 6px; }
+    .stat-value { font-size: 1.5rem; font-weight: 800; font-family: var(--font-mono); }
+
+    /* ═══════════════════════════════════════════════════
+       PROJECT INFO PANEL (for PDF)
+    ═══════════════════════════════════════════════════ */
+    .project-info-strip {
+      background: var(--bg-elevated);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 14px 20px;
+      margin-bottom: 20px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 16px;
+      align-items: center;
+    }
+
+    .project-info-strip .form-group { flex: 1; min-width: 160px; margin: 0; }
+
+    /* ═══════════════════════════════════════════════════
+       NOTIFICATION TOAST
+    ═══════════════════════════════════════════════════ */
+    .toast-container {
+      position: fixed;
+      bottom: 24px; right: 24px;
+      z-index: 9998;
+      display: flex; flex-direction: column; gap: 10px;
+    }
+
+    .toast {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 14px 18px;
+      font-size: .85rem;
+      font-weight: 600;
+      color: var(--text-primary);
+      box-shadow: var(--shadow-md);
+      display: flex; align-items: center; gap: 10px;
+      animation: slideInRight .3s ease;
+      max-width: 300px;
+    }
+
+    .toast.success { border-left: 3px solid var(--accent-green); }
+    .toast.error   { border-left: 3px solid var(--accent-red); }
+    .toast.info    { border-left: 3px solid var(--accent-blue); }
+
+    /* ═══════════════════════════════════════════════════
+       PROGRESS & MISC
+    ═══════════════════════════════════════════════════ */
+    .section-title {
+      font-size: 1.4rem;
+      font-weight: 800;
+      margin-bottom: 6px;
+      letter-spacing: -.02em;
+    }
+
+    .section-subtitle {
+      font-size: .85rem;
+      color: var(--text-muted);
+      margin-bottom: 24px;
+    }
+
+    .separator { height: 1px; background: var(--border); margin: 20px 0; }
+
+    .formula-hint {
+      background: rgba(59,130,246,.07);
+      border: 1px solid rgba(59,130,246,.18);
+      border-radius: var(--radius-sm);
+      padding: 10px 14px;
+      font-size: .8rem;
+      color: var(--text-secondary);
+      margin-top: 10px;
+      font-family: var(--font-mono);
+      line-height: 1.8;
+    }
+
+    .formula-hint strong { color: var(--accent-blue); }
+
+    .info-chip {
+      display: inline-flex; align-items: center; gap: 5px;
+      background: rgba(16,185,129,.1);
+      border: 1px solid rgba(16,185,129,.2);
+      border-radius: 99px;
+      padding: 3px 10px;
+      font-size: .73rem;
+      color: var(--accent-green);
+      font-weight: 600;
+    }
+
+    /* ═══════════════════════════════════════════════════
+       ANIMATIONS
+    ═══════════════════════════════════════════════════ */
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to   { opacity: 1; }
+    }
+
+    @keyframes slideUp {
+      from { opacity: 0; transform: translateY(24px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes slideInRight {
+      from { opacity: 0; transform: translateX(40px); }
+      to   { opacity: 1; transform: translateX(0); }
+    }
+
+    /* ═══════════════════════════════════════════════════
+       RESPONSIVE — MOBILE
+    ═══════════════════════════════════════════════════ */
+    /* ═══════════════════════════════════════════════════
+       MOBILE BOTTOM NAVIGATION BAR
+    ═══════════════════════════════════════════════════ */
+    .mobile-bottom-nav {
+      display: none;
+    }
+
+    @media (max-width: 768px) {
+      .sidebar {
+        position: fixed;
+        left: -100%;
+        top: 58px;
+        width: 80%;
+        max-width: 320px;
+        height: calc(100vh - 58px);
+        z-index: 550;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+      }
+
+      .sidebar.open { left: 0; }
+
+      .sidebar-overlay {
+        display: none;
+        position: fixed; inset: 0;
+        top: 58px;
+        background: rgba(0,0,0,.65);
+        backdrop-filter: blur(4px);
+        z-index: 540;
+      }
+
+      .sidebar-overlay.open { display: block; }
+
+      .hamburger { display: flex; }
+      
+      .navbar {
+        height: 58px;
+        padding: 0 14px;
+        position: sticky;
+        top: 0;
+        z-index: 500;
+        padding-top: max(0px, env(safe-area-inset-top));
+      }
+
+      .nav-title { font-size: 0.95rem; }
+      .nav-subtitle { font-size: 0.65rem; }
+      
+      .main-content {
+        padding: 14px 12px calc(82px + env(safe-area-inset-bottom, 12px)) 12px !important;
+      }
+
+      .hero-title { font-size: 1.35rem; }
+      .hero-banner { padding: 20px 16px; margin-bottom: 20px; }
+      .hero-banner::after { display: none; }
+      
+      .form-grid { grid-template-columns: 1fr; gap: 12px; }
+      
+      .card {
+        padding: 18px 14px;
+        margin-bottom: 16px;
+        border-radius: var(--radius-md);
+      }
+
+      .card-header {
+        margin-bottom: 16px;
+        padding-bottom: 12px;
+      }
+
+      input[type="text"],
+      input[type="number"],
+      select,
+      textarea {
+        min-height: 44px;
+        font-size: 16px; /* Prevents auto-zoom in mobile Safari/Android */
+        padding: 10px 12px;
+      }
+
+      .btn {
+        min-height: 44px;
+        padding: 10px 18px;
+        font-size: 0.85rem;
+        justify-content: center;
+      }
+
+      .btn:active,
+      .module-card:active,
+      .nav-btn:active {
+        transform: scale(0.97);
+      }
+
+      .nav-btn span { display: none; }
+      .nav-btn .icon { font-size: 16px; }
+      .splash-card { padding: 28px 18px; }
+      .result-grid { grid-template-columns: repeat(2, 1fr); gap: 10px; }
+      .result-item { padding: 12px; }
+      .result-value { font-size: 1.15rem; }
+
+      .toast-container {
+        bottom: calc(76px + env(safe-area-inset-bottom, 10px));
+        right: 12px;
+        left: 12px;
+      }
+
+      .toast {
+        max-width: 100%;
+      }
+
+      /* Native Mobile Bottom Navigation */
+      .mobile-bottom-nav {
+        display: flex;
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        height: calc(60px + env(safe-area-inset-bottom, 0px));
+        background: rgba(15, 23, 42, 0.96);
+        backdrop-filter: blur(18px);
+        -webkit-backdrop-filter: blur(18px);
+        border-top: 1px solid var(--border);
+        z-index: 600;
+        justify-content: space-around;
+        align-items: flex-start;
+        padding-top: 6px;
+        padding-bottom: env(safe-area-inset-bottom, 0px);
+        box-shadow: 0 -4px 20px rgba(0,0,0,0.35);
+      }
+
+      [data-theme="light"] .mobile-bottom-nav {
+        background: rgba(255, 255, 255, 0.96);
+      }
+
+      .mobile-nav-btn {
+        background: none;
+        border: none;
+        color: var(--text-muted);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 3px;
+        font-size: 0.65rem;
+        font-weight: 600;
+        cursor: pointer;
+        padding: 4px 10px;
+        border-radius: var(--radius-sm);
+        transition: var(--transition);
+        -webkit-tap-highlight-color: transparent;
+        flex: 1;
+        max-width: 72px;
+      }
+
+      .mobile-nav-btn:active {
+        transform: scale(0.92);
+      }
+
+      .mobile-nav-btn.active {
+        color: var(--accent-blue);
+      }
+
+      .mobile-nav-btn .m-icon {
+        font-size: 1.25rem;
+        line-height: 1;
+      }
+
+      .m-badge {
+        position: absolute;
+        top: -4px;
+        right: -8px;
+        background: var(--accent-blue);
+        color: #fff;
+        font-size: 0.58rem;
+        font-weight: 800;
+        padding: 1px 5px;
+        border-radius: 99px;
+        min-width: 14px;
+        text-align: center;
+      }
+    }
+
+    /* ═══════════════════════════════════════════════════
+       PRINT STYLES
+    ═══════════════════════════════════════════════════ */
+    @media print {
+      .navbar, .sidebar, .btn-group, .toast-container, #splash-overlay { display: none !important; }
+      .main-content { padding: 0; }
+    }
+
+    /* ═══════════════════════════════════════════════════
+       NUMBER INPUT — HIDE SPINNERS
+    ═══════════════════════════════════════════════════ */
+    input[type=number]::-webkit-inner-spin-button,
+    input[type=number]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
+    input[type=number] { -moz-appearance: textfield; }
+
+    /* ═══════════════════════════════════════════════════
+       TAG BADGE
+    ═══════════════════════════════════════════════════ */
+    .tag {
+      display: inline-flex;
+      padding: 3px 9px;
+      border-radius: 99px;
+      font-size: .72rem;
+      font-weight: 700;
+      margin-right: 4px;
+    }
+    .tag-blue   { background: rgba(59,130,246,.15);  color: var(--accent-blue); }
+    .tag-green  { background: rgba(16,185,129,.15);  color: var(--accent-green); }
+    .tag-amber  { background: rgba(245,158,11,.15);  color: var(--accent-amber); }
+    .tag-red    { background: rgba(239,68,68,.15);   color: var(--accent-red); }
+    .tag-purple { background: rgba(139,92,246,.15);  color: var(--accent-purple); }
+
+    /* ═══════════════════════════════════════════════════
+       FLEX UTILITY
+    ═══════════════════════════════════════════════════ */
+    .flex { display: flex; }
+    .flex-wrap { flex-wrap: wrap; }
+    .items-center { align-items: center; }
+    .justify-between { justify-content: space-between; }
+    .gap-10 { gap: 10px; }
+    .gap-16 { gap: 16px; }
+    .mt-8  { margin-top: 8px; }
+    .mt-16 { margin-top: 16px; }
+    .mb-16 { margin-bottom: 16px; }
+    .w-full { width: 100%; }
+    .text-right { text-align: right; }
+    .font-mono { font-family: var(--font-mono); }
+
+    /* Rebar table */
+    .rebar-row td { vertical-align: middle; }
+    .delete-row-btn {
+      background: none; border: none; cursor: pointer;
+      color: var(--accent-red); font-size: 16px;
+      padding: 4px; border-radius: 4px;
+      transition: var(--transition);
+    }
+    .delete-row-btn:hover { background: rgba(239,68,68,.1); }
+
+  </style>
+</head>
+<body>
+<noscript><div style="position:fixed;inset:0;background:#0b0f1a;color:#f0f4ff;display:flex;align-items:center;justify-content:center;font-family:sans-serif;font-size:1.2rem;text-align:center;padding:2rem;">Civil Estimation Suite requires JavaScript to be enabled in your browser.</div></noscript>
+
+<!-- ═══════════════════════════════════════════════════
+     SPLASH OVERLAY
+═══════════════════════════════════════════════════ -->
+<div id="splash-overlay">
+  <div class="splash-card">
+    <div class="splash-logo-wrap">🏗️</div>
+    <div class="splash-title">Civil Estimation Suite</div>
+    <div class="splash-subtitle">
+      Professional quantity estimation &amp; BOQ generation — built for engineers, by engineers.
+      Completely offline. Zero ads. Zero telemetry.
+    </div>
+    <div class="splash-badge">
+      <span>✦</span> Crafted with precision by Engineer Saad
+    </div>
+    <div class="splash-divider"></div>
+    <button class="splash-enter-btn" onclick="closeSplash()">
+      🚀 &nbsp; Enter Application
+    </button>
+    <label class="splash-dont-show">
+      <input type="checkbox" id="dontShowToday" />
+      Don't show again today
+    </label>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════
+     ABOUT MODAL
+═══════════════════════════════════════════════════ -->
+<div class="modal-overlay" id="aboutModal">
+  <div class="modal-box">
+    <button class="modal-close" onclick="closeModal('aboutModal')">✕</button>
+    <div style="margin-bottom:24px;">
+      <div style="font-size:1.3rem;font-weight:800;margin-bottom:4px;">About the Developers</div>
+      <div style="font-size:.82rem;color:var(--text-muted);">The minds behind Civil Estimation Suite</div>
+    </div>
+
+    <div class="dev-card">
+      <div class="dev-avatar blue">👷</div>
+      <div>
+        <div class="dev-name">Engineer Saad</div>
+        <div class="dev-role">Civil Engineer & Lead Developer</div>
+        <div class="dev-bio">
+          Graduate of Mirpur University of Science and Technology (MUST). Specializing in structural analysis, site estimation, and sustainable construction methodologies. Responsible for all engineering formulas, BOQ standards, and technical validation in this application.
+        </div>
+        <div style="margin-top:10px;display:flex;gap:6px;flex-wrap:wrap;">
+          <span class="tag tag-blue">Structural Analysis</span>
+          <span class="tag tag-green">Quantity Estimation</span>
+          <span class="tag tag-amber">Site Engineering</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="dev-card">
+      <div class="dev-avatar purple">👩‍💻</div>
+      <div>
+        <div class="dev-name">Syeda Mehwish</div>
+        <div class="dev-role">IT Specialist & Systems Architect</div>
+        <div class="dev-bio">
+          Graduate of Mirpur University of Science and Technology (MUST). Specializing in frontend UX/UI, offline systems architecture, and software engineering. Responsible for the app's design system, offline PWA capabilities, PDF generation engine, and data persistence layer.
+        </div>
+        <div style="margin-top:10px;display:flex;gap:6px;flex-wrap:wrap;">
+          <span class="tag tag-purple">UX/UI Design</span>
+          <span class="tag tag-blue">PWA Systems</span>
+          <span class="tag tag-green">Software Engineering</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="must-badge">
+      🎓 &nbsp;Proudly representing Mirpur University of Science and Technology (MUST) &nbsp;·&nbsp; Engineering Rigor &nbsp;·&nbsp; Innovation &nbsp;·&nbsp; Excellence
+    </div>
+
+    <div style="margin-top:20px;padding:14px 18px;background:var(--bg-elevated);border:1px solid var(--border);border-radius:var(--radius-md);font-size:.82rem;color:var(--text-muted);text-align:center;">
+      Civil Estimation Suite v2.0 &nbsp;·&nbsp; 100% Offline &nbsp;·&nbsp; No Ads &nbsp;·&nbsp; No Telemetry<br/>
+      <strong style="color:var(--text-secondary);">Built for the engineering community — free forever.</strong>
+    </div>
+  </div>
+</div>
+
+<!-- Sidebar overlay (mobile) -->
+<div class="sidebar-overlay" id="sidebarOverlay" onclick="closeSidebar()"></div>
+
+<!-- ═══════════════════════════════════════════════════
+     NAVBAR
+═══════════════════════════════════════════════════ -->
+<nav class="navbar">
+  <div style="display:flex;align-items:center;gap:12px;">
+    <button class="hamburger" id="hamburgerBtn" onclick="toggleSidebar()" aria-label="Menu">
+      <span></span><span></span><span></span>
+    </button>
+    <a class="nav-brand" href="#" onclick="switchSection('dashboard');return false;">
+      <div class="nav-logo">🏗️</div>
+      <div>
+        <div class="nav-title">Civil Estimation Suite</div>
+        <div class="nav-subtitle">By Engineer Saad &amp; Syeda Mehwish</div>
+      </div>
+    </a>
+  </div>
+  <div class="nav-actions">
+    <button class="nav-btn" onclick="openModal('aboutModal')">
+      <span class="icon">👥</span><span>About</span>
+    </button>
+    <button class="nav-btn accent" onclick="exportPDF()">
+      <span class="icon">📄</span><span>Export PDF</span>
+    </button>
+    <button class="theme-toggle" id="themeToggle" onclick="toggleTheme()" title="Toggle theme">🌙</button>
+  </div>
+</nav>
+
+<!-- ═══════════════════════════════════════════════════
+     APP LAYOUT
+═══════════════════════════════════════════════════ -->
+<div class="app-layout">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-section-label">Navigation</div>
+
+    <div class="sidebar-item active" onclick="switchSection('dashboard')" data-section="dashboard">
+      <span class="icon">🏠</span> Dashboard
+    </div>
+
+    <div class="sidebar-section-label">Estimation Modules</div>
+
+    <div class="sidebar-item" onclick="switchSection('concrete')" data-section="concrete">
+      <span class="icon">🧱</span> Concrete &amp; RCC
+    </div>
+    <div class="sidebar-item" onclick="switchSection('brickwork')" data-section="brickwork">
+      <span class="icon">🏠</span> Brickwork &amp; Mortar
+    </div>
+    <div class="sidebar-item" onclick="switchSection('plastering')" data-section="plastering">
+      <span class="icon">🪣</span> Plastering &amp; Flooring
+    </div>
+    <div class="sidebar-item" onclick="switchSection('rebar')" data-section="rebar">
+      <span class="icon">⚙️</span> Rebar &amp; Steel
+    </div>
+    <div class="sidebar-item" onclick="switchSection('excavation')" data-section="excavation">
+      <span class="icon">🚜</span> Excavation &amp; Earthwork
+    </div>
+
+    <div class="sidebar-section-label">Cost &amp; Reports</div>
+
+    <div class="sidebar-item" onclick="switchSection('boq')" data-section="boq">
+      <span class="icon">📋</span> BOQ &amp; Cost Aggregator
+      <span class="sidebar-badge" id="boqItemCount">0</span>
+    </div>
+    <div class="sidebar-item" onclick="switchSection('rates')" data-section="rates">
+      <span class="icon">💰</span> Unit Rate Config
+    </div>
+
+    <div class="sidebar-section-label">Tools</div>
+
+    <div class="sidebar-item" onclick="switchSection('converter')" data-section="converter">
+      <span class="icon">🔄</span> Unit Converter
+    </div>
+
+    <div style="margin-top:auto;padding-top:20px;border-top:1px solid var(--border);margin-top:24px;">
+      <div style="font-size:.72rem;color:var(--text-muted);padding:8px;text-align:center;line-height:1.6;">
+        ✦ All calculations saved locally<br/>
+        <span style="color:var(--accent-green);">● 100% Offline</span>
+      </div>
+    </div>
+  </aside>
+
+  <!-- MAIN CONTENT -->
+  <main class="main-content" id="mainContent">
+
+    <!-- PROJECT INFO STRIP (global) -->
+    <div class="project-info-strip" id="projectInfoStrip">
+      <div class="form-group">
+        <label>Project Name</label>
+        <input type="text" id="projectName" placeholder="e.g. Residential Block A" oninput="autoSave()" />
+      </div>
+      <div class="form-group">
+        <label>Location</label>
+        <input type="text" id="projectLocation" placeholder="e.g. Mirpur, AJK" oninput="autoSave()" />
+      </div>
+      <div class="form-group">
+        <label>Engineer / Client</label>
+        <input type="text" id="projectEngineer" placeholder="e.g. Engineer Saad" oninput="autoSave()" />
+      </div>
+    </div>
+
+    <!-- ══════ SECTION: DASHBOARD ══════ -->
+    <div class="section-panel active" id="section-dashboard">
+      <div class="hero-banner">
+        <div class="hero-tag">✦ Production Ready · Offline PWA</div>
+        <div class="hero-title">Professional Civil<br/><span>Estimation Suite</span></div>
+        <div class="hero-desc">
+          Industry-standard quantity estimation, BOQ generation, and cost analysis — all offline. Click any module below to get started.
+        </div>
+      </div>
+
+      <div class="stats-row" id="dashStats">
+        <div class="stat-card">
+          <div class="stat-label">BOQ Line Items</div>
+          <div class="stat-value result-accent" id="statBOQ">0</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Estimated Cost</div>
+          <div class="stat-value result-green" id="statCost">PKR 0</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Calcs Performed</div>
+          <div class="stat-value result-amber" id="statCalcs">0</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Session Status</div>
+          <div class="stat-value" style="font-size:.95rem;color:var(--accent-green);">✓ Auto-Saved</div>
+        </div>
+      </div>
+
+      <div style="font-size:.88rem;font-weight:700;color:var(--text-secondary);margin-bottom:14px;text-transform:uppercase;letter-spacing:.08em;">Estimation Modules</div>
+      <div class="module-grid">
+        <div class="module-card c-blue" onclick="switchSection('concrete')">
+          <div class="module-icon">🧱</div>
+          <div class="module-name">Concrete &amp; RCC</div>
+          <div class="module-info">Slabs, Beams, Columns, Footings</div>
+        </div>
+        <div class="module-card c-amber" onclick="switchSection('brickwork')">
+          <div class="module-icon">🏠</div>
+          <div class="module-name">Brickwork &amp; Mortar</div>
+          <div class="module-info">Brick count, cement &amp; sand</div>
+        </div>
+        <div class="module-card c-green" onclick="switchSection('plastering')">
+          <div class="module-icon">🪣</div>
+          <div class="module-name">Plastering &amp; Flooring</div>
+          <div class="module-info">Plaster mortar &amp; tile count</div>
+        </div>
+        <div class="module-card c-purple" onclick="switchSection('rebar')">
+          <div class="module-icon">⚙️</div>
+          <div class="module-name">Rebar &amp; Steel</div>
+          <div class="module-info">Weight estimator &amp; bar count</div>
+        </div>
+        <div class="module-card c-orange" onclick="switchSection('excavation')">
+          <div class="module-icon">🚜</div>
+          <div class="module-name">Excavation &amp; Earthwork</div>
+          <div class="module-info">Volume, swell &amp; truck loads</div>
+        </div>
+        <div class="module-card c-cyan" onclick="switchSection('boq')">
+          <div class="module-icon">📋</div>
+          <div class="module-name">BOQ &amp; Cost Aggregator</div>
+          <div class="module-info">Live cost &amp; grand total</div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <div class="card-icon blue">💡</div>
+          <div>
+            <div class="card-title">Quick Tips</div>
+            <div class="card-desc">Get the most out of Civil Estimation Suite</div>
+          </div>
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px;">
+          <div style="background:var(--bg-elevated);border-radius:var(--radius-md);padding:14px;border:1px solid var(--border);">
+            <div style="font-size:.82rem;font-weight:700;margin-bottom:4px;">🔄 Auto-Save</div>
+            <div style="font-size:.78rem;color:var(--text-muted);">All form inputs are automatically saved to localStorage. Your work is never lost on refresh.</div>
+          </div>
+          <div style="background:var(--bg-elevated);border-radius:var(--radius-md);padding:14px;border:1px solid var(--border);">
+            <div style="font-size:.82rem;font-weight:700;margin-bottom:4px;">📋 BOQ Integration</div>
+            <div style="font-size:.78rem;color:var(--text-muted);">Add results from any module directly to the BOQ with one click, then export a professional PDF report.</div>
+          </div>
+          <div style="background:var(--bg-elevated);border-radius:var(--radius-md);padding:14px;border:1px solid var(--border);">
+            <div style="font-size:.82rem;font-weight:700;margin-bottom:4px;">💰 Rate Config</div>
+            <div style="font-size:.78rem;color:var(--text-muted);">Set your local unit rates once in the Rate Config panel — all BOQ cost calculations update automatically.</div>
+          </div>
+          <div style="background:var(--bg-elevated);border-radius:var(--radius-md);padding:14px;border:1px solid var(--border);">
+            <div style="font-size:.82rem;font-weight:700;margin-bottom:4px;">📐 Metric &amp; Imperial</div>
+            <div style="font-size:.78rem;color:var(--text-muted);">Every module supports both metric (m, m³, kg) and imperial (ft, yd³, bags/lbs) unit systems.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══════ SECTION: CONCRETE & RCC ══════ -->
+    <div class="section-panel" id="section-concrete">
+      <div class="section-title">Concrete &amp; RCC Estimator</div>
+      <div class="section-subtitle">Calculate cement, sand, aggregate &amp; water for any concrete member</div>
+
+      <div class="unit-toggle-wrap">
+        <span class="unit-toggle-label">Unit System:</span>
+        <div class="toggle-group">
+          <button class="toggle-opt active" onclick="setUnit('concrete','metric',this)">Metric (m)</button>
+          <button class="toggle-opt" onclick="setUnit('concrete','imperial',this)">Imperial (ft)</button>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <div class="card-icon blue">🧱</div>
+          <div>
+            <div class="card-title">Member Configuration</div>
+            <div class="card-desc">Enter member type and dimensions</div>
+          </div>
+        </div>
+
+        <div class="form-grid">
+          <div class="form-group">
+            <label>Member Type</label>
+            <select id="c_memberType" onchange="autoSave()">
+              <option value="slab">Slab</option>
+              <option value="beam">Beam</option>
+              <option value="column">Column</option>
+              <option value="footing">Footing (Rectangular)</option>
+              <option value="footing_circular">Footing (Circular)</option>
+              <option value="column_circular">Column (Circular)</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Mix Ratio</label>
+            <select id="c_mixRatio" onchange="onMixChange();autoSave()">
+              <option value="1:1.5:3">1:1.5:3 (M20 — Standard)</option>
+              <option value="1:2:4">1:2:4 (M15 — General)</option>
+              <option value="1:3:6">1:3:6 (M10 — Lean)</option>
+              <option value="1:1:2">1:1:2 (M25 — Strong)</option>
+              <option value="custom">Custom Ratio</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-grid" id="customMixRow" style="display:none;">
+          <div class="form-group">
+            <label>Cement Parts</label>
+            <input type="number" id="c_cement_part" value="1" min="0.5" step="0.5" />
+          </div>
+          <div class="form-group">
+            <label>Sand Parts</label>
+            <input type="number" id="c_sand_part" value="2" min="0.5" step="0.5" />
+          </div>
+          <div class="form-group">
+            <label>Aggregate Parts</label>
+            <input type="number" id="c_agg_part" value="4" min="0.5" step="0.5" />
+          </div>
+        </div>
+
+        <div class="form-grid" id="c_dims">
+          <div class="form-group" id="c_l_group">
+            <label>Length <span class="unit-hint" id="c_unit_l">(m)</span></label>
+            <input type="number" id="c_length" placeholder="e.g. 5.0" step="0.01" oninput="autoSave()" />
+            <span class="error-msg" id="c_length_err">Must be greater than 0</span>
+          </div>
+          <div class="form-group" id="c_w_group">
+            <label>Width <span class="unit-hint" id="c_unit_w">(m)</span></label>
+            <input type="number" id="c_width" placeholder="e.g. 4.0" step="0.01" oninput="autoSave()" />
+            <span class="error-msg" id="c_width_err">Must be greater than 0</span>
+          </div>
+          <div class="form-group" id="c_h_group">
+            <label>Depth / Thickness <span class="unit-hint" id="c_unit_h">(m)</span></label>
+            <input type="number" id="c_depth" placeholder="e.g. 0.15" step="0.001" oninput="autoSave()" />
+            <span class="error-msg" id="c_depth_err">Must be greater than 0</span>
+          </div>
+          <div class="form-group" id="c_d_group" style="display:none;">
+            <label>Diameter <span class="unit-hint" id="c_unit_d">(m)</span></label>
+            <input type="number" id="c_diameter" placeholder="e.g. 0.5" step="0.01" oninput="autoSave()" />
+            <span class="error-msg" id="c_diam_err">Must be greater than 0</span>
+          </div>
+          <div class="form-group">
+            <label>No. of Members</label>
+            <input type="number" id="c_count" value="1" min="1" step="1" oninput="autoSave()" />
+          </div>
+          <div class="form-group">
+            <label>Dry Volume Factor</label>
+            <input type="number" id="c_dryFactor" value="1.54" step="0.01" oninput="autoSave()" />
+          </div>
+          <div class="form-group">
+            <label>Wastage %</label>
+            <input type="number" id="c_wastage" value="5" min="0" max="30" step="1" oninput="autoSave()" />
+          </div>
+        </div>
+
+        <div class="formula-hint">
+          <strong>Formula:</strong> Wet Volume = L × W × D × Count<br/>
+          Dry Volume = Wet Vol × Dry Factor (default 1.54)<br/>
+          Cement = (C/(C+S+A)) × Dry Vol / 0.0347 bags &nbsp;|&nbsp; Sand = (S/(C+S+A)) × Dry Vol m³ &nbsp;|&nbsp; Aggregate = (A/(C+S+A)) × Dry Vol m³
+        </div>
+
+        <div class="btn-group">
+          <button class="btn btn-primary" onclick="calcConcrete()">⚡ Calculate</button>
+          <button class="btn btn-secondary" onclick="resetForm('concrete')">↺ Reset</button>
+        </div>
+      </div>
+
+      <div class="result-panel" id="res-concrete">
+        <div class="result-panel-header">✅ Concrete Estimation Results</div>
+        <div class="result-grid" id="res-concrete-grid"></div>
+        <div class="btn-group" style="margin-top:16px;">
+          <button class="btn btn-success btn-sm" onclick="addToBOQ('concrete')">➕ Add to BOQ</button>
+          <button class="btn btn-amber btn-sm" onclick="exportPDF()">📄 Export PDF</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══════ SECTION: BRICKWORK ══════ -->
+    <div class="section-panel" id="section-brickwork">
+      <div class="section-title">Brickwork &amp; Mortar Estimator</div>
+      <div class="section-subtitle">Calculate brick quantities, cement bags and sand for masonry walls</div>
+
+      <div class="unit-toggle-wrap">
+        <span class="unit-toggle-label">Unit System:</span>
+        <div class="toggle-group">
+          <button class="toggle-opt active" onclick="setUnit('brickwork','metric',this)">Metric (m)</button>
+          <button class="toggle-opt" onclick="setUnit('brickwork','imperial',this)">Imperial (ft)</button>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <div class="card-icon amber">🏠</div>
+          <div>
+            <div class="card-title">Wall Configuration</div>
+            <div class="card-desc">Define wall dimensions and masonry specifications</div>
+          </div>
+        </div>
+
+        <div class="form-grid">
+          <div class="form-group">
+            <label>Wall Length <span class="unit-hint" id="bw_unit_l">(m)</span></label>
+            <input type="number" id="bw_length" placeholder="e.g. 10.0" step="0.01" oninput="autoSave()" />
+            <span class="error-msg" id="bw_length_err">Must be greater than 0</span>
+          </div>
+          <div class="form-group">
+            <label>Wall Height <span class="unit-hint" id="bw_unit_h">(m)</span></label>
+            <input type="number" id="bw_height" placeholder="e.g. 3.0" step="0.01" oninput="autoSave()" />
+            <span class="error-msg" id="bw_height_err">Must be greater than 0</span>
+          </div>
+          <div class="form-group">
+            <label>Wall Thickness</label>
+            <select id="bw_thickness" onchange="autoSave()">
+              <option value="0.115">4.5" / 115mm (Half Brick)</option>
+              <option value="0.23" selected>9" / 230mm (One Brick)</option>
+              <option value="0.345">13.5" / 345mm (One &amp; Half)</option>
+              <option value="custom">Custom (mm)</option>
+            </select>
+          </div>
+          <div class="form-group" id="bw_custom_thick_group" style="display:none;">
+            <label>Custom Thickness (mm)</label>
+            <input type="number" id="bw_custom_thick" placeholder="e.g. 200" step="1" oninput="autoSave()" />
+          </div>
+        </div>
+
+        <div class="form-grid">
+          <div class="form-group">
+            <label>Brick Standard</label>
+            <select id="bw_brickStd" onchange="autoSave()">
+              <option value="230x115x75">Standard (230×115×75 mm)</option>
+              <option value="190x90x57">Modular (190×90×57 mm)</option>
+              <option value="custom">Custom Brick Size</option>
+            </select>
+          </div>
+          <div class="form-group" id="bw_custom_brick_group" style="display:none;">
+            <label>Brick L×W×H (mm, comma-separated)</label>
+            <input type="text" id="bw_custom_brick" placeholder="e.g. 230,115,75" oninput="autoSave()" />
+          </div>
+          <div class="form-group">
+            <label>Mortar Thickness (mm)</label>
+            <input type="number" id="bw_mortarThick" value="10" min="8" max="15" step="1" oninput="autoSave()" />
+          </div>
+          <div class="form-group">
+            <label>Mortar Mix Ratio</label>
+            <select id="bw_mortarMix" onchange="autoSave()">
+              <option value="1:3">1:3 (Strong)</option>
+              <option value="1:4">1:4 (Standard)</option>
+              <option value="1:5">1:5 (Moderate)</option>
+              <option value="1:6" selected>1:6 (General Masonry)</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Wastage %</label>
+            <input type="number" id="bw_wastage" value="10" min="0" max="25" step="1" oninput="autoSave()" />
+          </div>
+          <div class="form-group">
+            <label>Deduct Openings Area <span class="unit-hint" id="bw_unit_open">(m²)</span></label>
+            <input type="number" id="bw_openings" value="0" min="0" step="0.01" oninput="autoSave()" />
+          </div>
+        </div>
+
+        <div class="formula-hint">
+          <strong>Formula:</strong> Net Wall Volume = (L × H × Thickness) − Opening Deductions<br/>
+          Bricks/m³ = 1 / ((BL+MT) × (BW+MT) × (BH+MT))<br/>
+          Mortar Volume = Wall Vol − (No. of Bricks × Brick Volume)<br/>
+          Dry Mortar = Mortar Vol × 1.33 &nbsp;·&nbsp; Cement = S/(1+S) × Dry/0.0347
+        </div>
+
+        <div class="btn-group">
+          <button class="btn btn-primary" onclick="calcBrickwork()">⚡ Calculate</button>
+          <button class="btn btn-secondary" onclick="resetForm('brickwork')">↺ Reset</button>
+        </div>
+      </div>
+
+      <div class="result-panel" id="res-brickwork">
+        <div class="result-panel-header">✅ Brickwork Estimation Results</div>
+        <div class="result-grid" id="res-brickwork-grid"></div>
+        <div class="btn-group" style="margin-top:16px;">
+          <button class="btn btn-success btn-sm" onclick="addToBOQ('brickwork')">➕ Add to BOQ</button>
+          <button class="btn btn-amber btn-sm" onclick="exportPDF()">📄 Export PDF</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══════ SECTION: PLASTERING & FLOORING ══════ -->
+    <div class="section-panel" id="section-plastering">
+      <div class="section-title">Plastering &amp; Flooring Estimator</div>
+      <div class="section-subtitle">Calculate plaster mortar quantities and tile counts</div>
+
+      <div class="unit-toggle-wrap">
+        <span class="unit-toggle-label">Unit System:</span>
+        <div class="toggle-group">
+          <button class="toggle-opt active" onclick="setUnit('plastering','metric',this)">Metric (m²)</button>
+          <button class="toggle-opt" onclick="setUnit('plastering','imperial',this)">Imperial (ft²)</button>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <div class="card-icon green">🪣</div>
+          <div>
+            <div class="card-title">Plastering Configuration</div>
+            <div class="card-desc">Surface area, thickness and mix ratio</div>
+          </div>
+        </div>
+
+        <div class="form-grid">
+          <div class="form-group">
+            <label>Surface Area <span class="unit-hint" id="pl_unit_area">(m²)</span></label>
+            <input type="number" id="pl_area" placeholder="e.g. 50" step="0.01" oninput="autoSave()" />
+            <span class="error-msg" id="pl_area_err">Must be greater than 0</span>
+          </div>
+          <div class="form-group">
+            <label>Plaster Thickness</label>
+            <select id="pl_thickness" onchange="autoSave()">
+              <option value="0.012">12mm (Internal)</option>
+              <option value="0.015" selected>15mm (Standard)</option>
+              <option value="0.020">20mm (External)</option>
+              <option value="0.025">25mm (Thick)</option>
+              <option value="custom">Custom (mm)</option>
+            </select>
+          </div>
+          <div class="form-group" id="pl_custom_thick_group" style="display:none;">
+            <label>Custom Thickness (mm)</label>
+            <input type="number" id="pl_custom_thick" placeholder="e.g. 18" step="1" />
+          </div>
+          <div class="form-group">
+            <label>Mix Ratio</label>
+            <select id="pl_mixRatio" onchange="autoSave()">
+              <option value="1:3">1:3 (Rich)</option>
+              <option value="1:4" selected>1:4 (Standard)</option>
+              <option value="1:5">1:5 (Moderate)</option>
+              <option value="1:6">1:6 (Lean)</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Wastage %</label>
+            <input type="number" id="pl_wastage" value="10" min="0" max="20" step="1" oninput="autoSave()" />
+          </div>
+          <div class="form-group">
+            <label>No. of Coats</label>
+            <input type="number" id="pl_coats" value="1" min="1" max="3" step="1" oninput="autoSave()" />
+          </div>
+        </div>
+
+        <div class="btn-group">
+          <button class="btn btn-primary" onclick="calcPlastering()">⚡ Calculate Plaster</button>
+          <button class="btn btn-secondary" onclick="resetForm('plastering')">↺ Reset</button>
+        </div>
+      </div>
+
+      <div class="result-panel" id="res-plastering">
+        <div class="result-panel-header">✅ Plastering Results</div>
+        <div class="result-grid" id="res-plastering-grid"></div>
+        <div class="btn-group" style="margin-top:16px;">
+          <button class="btn btn-success btn-sm" onclick="addToBOQ('plastering')">➕ Add to BOQ</button>
+        </div>
+      </div>
+
+      <!-- Tile Sub-module -->
+      <div class="card">
+        <div class="card-header">
+          <div class="card-icon cyan">🔲</div>
+          <div>
+            <div class="card-title">Tile / Flooring Calculator</div>
+            <div class="card-desc">Count tiles, adhesive and grout required</div>
+          </div>
+        </div>
+
+        <div class="form-grid">
+          <div class="form-group">
+            <label>Floor / Wall Area <span class="unit-hint" id="ti_unit_area">(m²)</span></label>
+            <input type="number" id="ti_area" placeholder="e.g. 30" step="0.01" oninput="autoSave()" />
+            <span class="error-msg" id="ti_area_err">Must be greater than 0</span>
+          </div>
+          <div class="form-group">
+            <label>Tile Length (mm)</label>
+            <input type="number" id="ti_length" value="600" min="50" step="10" oninput="autoSave()" />
+          </div>
+          <div class="form-group">
+            <label>Tile Width (mm)</label>
+            <input type="number" id="ti_width" value="600" min="50" step="10" oninput="autoSave()" />
+          </div>
+          <div class="form-group">
+            <label>Joint Gap (mm)</label>
+            <input type="number" id="ti_joint" value="3" min="1" max="15" step="1" oninput="autoSave()" />
+          </div>
+          <div class="form-group">
+            <label>Tile Wastage %</label>
+            <input type="number" id="ti_wastage" value="10" min="0" max="25" step="1" oninput="autoSave()" />
+          </div>
+        </div>
+
+        <div class="btn-group">
+          <button class="btn btn-primary" onclick="calcTiles()">⚡ Calculate Tiles</button>
+        </div>
+      </div>
+
+      <div class="result-panel" id="res-tiles">
+        <div class="result-panel-header">✅ Tile Estimation Results</div>
+        <div class="result-grid" id="res-tiles-grid"></div>
+        <div class="btn-group" style="margin-top:16px;">
+          <button class="btn btn-success btn-sm" onclick="addToBOQ('tiles')">➕ Add to BOQ</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══════ SECTION: REBAR & STEEL ══════ -->
+    <div class="section-panel" id="section-rebar">
+      <div class="section-title">Reinforcement Steel (Rebar) Estimator</div>
+      <div class="section-subtitle">Calculate total steel tonnage, bar counts and weights</div>
+
+      <div class="unit-toggle-wrap">
+        <span class="unit-toggle-label">Unit System:</span>
+        <div class="toggle-group">
+          <button class="toggle-opt active" onclick="setUnit('rebar','metric',this)">Metric (kg/m)</button>
+          <button class="toggle-opt" onclick="setUnit('rebar','imperial',this)">Imperial (lbs/ft)</button>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <div class="card-icon purple">⚙️</div>
+          <div>
+            <div class="card-title">Rebar Schedule</div>
+            <div class="card-desc">Add multiple rebar entries and calculate total weight</div>
+          </div>
+        </div>
+
+        <div class="boq-table-wrap">
+          <table id="rebarTable">
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>Description</th>
+                <th>Diameter <span id="rb_unit_dia">(mm)</span></th>
+                <th>No. of Bars</th>
+                <th>Cutting Length <span id="rb_unit_len">(m)</span></th>
+                <th>Unit Wt <span id="rb_unit_wt">(kg/m)</span></th>
+                <th>Total Weight</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody id="rebarBody">
+              <!-- rows added dynamically -->
+            </tbody>
+          </table>
+        </div>
+
+        <div class="btn-group">
+          <button class="btn btn-secondary btn-sm" onclick="addRebarRow()">➕ Add Row</button>
+          <button class="btn btn-primary" onclick="calcRebar()">⚡ Calculate Total</button>
+          <button class="btn btn-secondary" onclick="clearRebarTable()">↺ Clear All</button>
+        </div>
+
+        <div class="formula-hint">
+          <strong>Metric:</strong> Unit Weight (kg/m) = d² / 162 &nbsp;|&nbsp; Total = ΣUnit Wt × No.Bars × Cutting Length<br/>
+          <strong>Imperial:</strong> Unit Weight (lbs/ft) = d² / 24 &nbsp;|&nbsp; d in inches (bar # ÷ 8)
+        </div>
+      </div>
+
+      <div class="result-panel" id="res-rebar">
+        <div class="result-panel-header">✅ Rebar Estimation Results</div>
+        <div class="result-grid" id="res-rebar-grid"></div>
+        <div class="btn-group" style="margin-top:16px;">
+          <button class="btn btn-success btn-sm" onclick="addToBOQ('rebar')">➕ Add to BOQ</button>
+          <button class="btn btn-amber btn-sm" onclick="exportPDF()">📄 Export PDF</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══════ SECTION: EXCAVATION ══════ -->
+    <div class="section-panel" id="section-excavation">
+      <div class="section-title">Excavation &amp; Earthwork Estimator</div>
+      <div class="section-subtitle">Bank volume, loose volume, and truck load estimation</div>
+
+      <div class="unit-toggle-wrap">
+        <span class="unit-toggle-label">Unit System:</span>
+        <div class="toggle-group">
+          <button class="toggle-opt active" onclick="setUnit('excavation','metric',this)">Metric (m³)</button>
+          <button class="toggle-opt" onclick="setUnit('excavation','imperial',this)">Imperial (yd³)</button>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <div class="card-icon orange">🚜</div>
+          <div>
+            <div class="card-title">Excavation Parameters</div>
+            <div class="card-desc">Configure pit/trench dimensions and soil properties</div>
+          </div>
+        </div>
+
+        <div class="form-grid">
+          <div class="form-group">
+            <label>Excavation Type</label>
+            <select id="ex_type" onchange="toggleExcavationType();autoSave()">
+              <option value="trench">Trench (Linear)</option>
+              <option value="pit">Foundation Pit</option>
+              <option value="area">Area Stripping</option>
+            </select>
+          </div>
+          <div class="form-group" id="ex_l_group">
+            <label>Length <span class="unit-hint" id="ex_unit_l">(m)</span></label>
+            <input type="number" id="ex_length" placeholder="e.g. 20" step="0.1" oninput="autoSave()" />
+            <span class="error-msg" id="ex_length_err">Must be greater than 0</span>
+          </div>
+          <div class="form-group">
+            <label>Width / Breadth <span class="unit-hint" id="ex_unit_w">(m)</span></label>
+            <input type="number" id="ex_width" placeholder="e.g. 1.5" step="0.01" oninput="autoSave()" />
+            <span class="error-msg" id="ex_width_err">Must be greater than 0</span>
+          </div>
+          <div class="form-group">
+            <label>Depth <span class="unit-hint" id="ex_unit_d">(m)</span></label>
+            <input type="number" id="ex_depth" placeholder="e.g. 2.0" step="0.01" oninput="autoSave()" />
+            <span class="error-msg" id="ex_depth_err">Must be greater than 0</span>
+          </div>
+        </div>
+
+        <div class="form-grid">
+          <div class="form-group">
+            <label>Soil Classification</label>
+            <select id="ex_soilClass" onchange="updateSwellFactor();autoSave()">
+              <option value="1.10">Soft / Loose Clay (10% swell)</option>
+              <option value="1.15">Sandy / Loam Soil (15% swell)</option>
+              <option value="1.20" selected>Medium Clay (20% swell)</option>
+              <option value="1.25">Stiff Clay (25% swell)</option>
+              <option value="1.30">Hard / Rocky Soil (30% swell)</option>
+              <option value="custom">Custom Swell Factor</option>
+            </select>
+          </div>
+          <div class="form-group" id="ex_custom_swell_group" style="display:none;">
+            <label>Custom Swell Factor</label>
+            <input type="number" id="ex_custom_swell" value="1.20" step="0.01" min="1.0" max="1.5" />
+          </div>
+          <div class="form-group">
+            <label>Swell / Bulking Factor</label>
+            <input type="number" id="ex_swellFactor" value="1.20" step="0.01" readonly
+                   style="background:var(--bg-elevated);cursor:default;" />
+          </div>
+          <div class="form-group">
+            <label>Side Slope (H:V)</label>
+            <select id="ex_slope" onchange="autoSave()">
+              <option value="0">Vertical (0:1)</option>
+              <option value="0.25">1:4 — Hard soils</option>
+              <option value="0.5" selected>1:2 — Medium soils</option>
+              <option value="1">1:1 — Soft soils</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Truck Capacity <span class="unit-hint" id="ex_unit_truck">(m³)</span></label>
+            <input type="number" id="ex_truckCap" value="5" min="1" step="0.5" oninput="autoSave()" />
+          </div>
+          <div class="form-group">
+            <label>No. of Pits / Trenches</label>
+            <input type="number" id="ex_count" value="1" min="1" step="1" oninput="autoSave()" />
+          </div>
+        </div>
+
+        <div class="formula-hint">
+          <strong>Bank Volume</strong> = L × W × D × Count (prismatoid)<br/>
+          <strong>Slope Addition</strong> = extra volume from 4 sides based on H:V ratio<br/>
+          <strong>Loose Volume</strong> = Bank Volume × Swell Factor<br/>
+          <strong>Truck Loads</strong> = ceil(Loose Volume / Truck Capacity)
+        </div>
+
+        <div class="btn-group">
+          <button class="btn btn-primary" onclick="calcExcavation()">⚡ Calculate</button>
+          <button class="btn btn-secondary" onclick="resetForm('excavation')">↺ Reset</button>
+        </div>
+      </div>
+
+      <div class="result-panel" id="res-excavation">
+        <div class="result-panel-header">✅ Excavation Results</div>
+        <div class="result-grid" id="res-excavation-grid"></div>
+        <div class="btn-group" style="margin-top:16px;">
+          <button class="btn btn-success btn-sm" onclick="addToBOQ('excavation')">➕ Add to BOQ</button>
+          <button class="btn btn-amber btn-sm" onclick="exportPDF()">📄 Export PDF</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══════ SECTION: BOQ & COST ══════ -->
+    <div class="section-panel" id="section-boq">
+      <div class="section-title">BOQ &amp; Cost Aggregator</div>
+      <div class="section-subtitle">Live Bill of Quantities with real-time cost calculation</div>
+
+      <div class="card">
+        <div class="card-header">
+          <div class="card-icon cyan">📋</div>
+          <div>
+            <div class="card-title">Bill of Quantities</div>
+            <div class="card-desc">Add items manually or from module results</div>
+          </div>
+        </div>
+
+        <div class="boq-table-wrap">
+          <table id="boqTable">
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>Description</th>
+                <th>Quantity</th>
+                <th>Unit</th>
+                <th>Unit Rate (PKR)</th>
+                <th>Amount (PKR)</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody id="boqBody">
+              <tr id="boq-empty-row">
+                <td colspan="7" style="text-align:center;color:var(--text-muted);padding:24px;font-style:italic;">
+                  No items yet. Calculate from a module and click "Add to BOQ", or add manually below.
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="btn-group">
+          <button class="btn btn-secondary btn-sm" onclick="addManualBOQRow()">➕ Add Manual Item</button>
+          <button class="btn btn-danger btn-sm" onclick="clearBOQ()">🗑️ Clear BOQ</button>
+        </div>
+
+        <!-- Cost Summary -->
+        <div class="cost-summary" id="costSummaryPanel">
+          <div style="font-size:.9rem;font-weight:700;margin-bottom:16px;display:flex;align-items:center;gap:8px;">
+            💰 Cost Summary
+            <span class="info-chip">● Live</span>
+          </div>
+
+          <div class="cost-row">
+            <span class="cost-label">Material Subtotal</span>
+            <span class="cost-value" id="costSubtotal">PKR 0</span>
+          </div>
+
+          <div class="cost-row" style="align-items:flex-start;flex-wrap:wrap;gap:10px;">
+            <span class="cost-label">Labor &amp; Installation (%)</span>
+            <div style="display:flex;align-items:center;gap:8px;">
+              <input type="number" id="laborPct" value="15" min="0" max="100" step="1"
+                     style="width:80px;" oninput="recalcBOQCosts()" />
+              <span class="cost-value" id="costLabor">PKR 0</span>
+            </div>
+          </div>
+
+          <div class="cost-row" style="align-items:flex-start;flex-wrap:wrap;gap:10px;">
+            <span class="cost-label">Contingencies / Overhead (%)</span>
+            <div style="display:flex;align-items:center;gap:8px;">
+              <input type="number" id="contingencyPct" value="5" min="0" max="50" step="1"
+                     style="width:80px;" oninput="recalcBOQCosts()" />
+              <span class="cost-value" id="costContingency">PKR 0</span>
+            </div>
+          </div>
+
+          <div class="cost-row" style="align-items:flex-start;flex-wrap:wrap;gap:10px;">
+            <span class="cost-label">GST / Tax (%)</span>
+            <div style="display:flex;align-items:center;gap:8px;">
+              <input type="number" id="taxPct" value="0" min="0" max="30" step="1"
+                     style="width:80px;" oninput="recalcBOQCosts()" />
+              <span class="cost-value" id="costTax">PKR 0</span>
+            </div>
+          </div>
+
+          <div class="cost-grand-total">
+            <span class="cost-grand-label">GRAND TOTAL</span>
+            <span class="cost-grand-value" id="costGrandTotal">PKR 0</span>
+          </div>
+        </div>
+
+        <div class="btn-group">
+          <button class="btn btn-amber" onclick="exportPDF()">📄 Export Official BOQ / Report</button>
+          <button class="btn btn-secondary" onclick="saveBOQToStorage()">💾 Save BOQ</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══════ SECTION: RATE CONFIG ══════ -->
+    <div class="section-panel" id="section-rates">
+      <div class="section-title">Unit Rate Configuration</div>
+      <div class="section-subtitle">Set your local material rates — used for live BOQ cost calculations</div>
+
+      <div class="card">
+        <div class="card-header">
+          <div class="card-icon green">💰</div>
+          <div>
+            <div class="card-title">Material Unit Rates</div>
+            <div class="card-desc">Enter current local market rates (PKR by default)</div>
+          </div>
+        </div>
+
+        <div style="margin-bottom:16px;">
+          <label style="font-size:.82rem;margin-bottom:6px;display:block;">Currency Symbol</label>
+          <input type="text" id="currencySymbol" value="PKR" style="width:120px;" oninput="autoSave()" />
+        </div>
+
+        <div class="form-grid">
+          <div class="form-group">
+            <label>Cement (per 50kg bag)</label>
+            <input type="number" id="rate_cement" placeholder="e.g. 950" step="1" oninput="autoSave()" />
+          </div>
+          <div class="form-group">
+            <label>Sand (per m³ / cubic yard)</label>
+            <input type="number" id="rate_sand" placeholder="e.g. 3500" step="1" oninput="autoSave()" />
+          </div>
+          <div class="form-group">
+            <label>Coarse Aggregate (per m³)</label>
+            <input type="number" id="rate_aggregate" placeholder="e.g. 5000" step="1" oninput="autoSave()" />
+          </div>
+          <div class="form-group">
+            <label>Steel / Rebar (per metric ton)</label>
+            <input type="number" id="rate_steel" placeholder="e.g. 280000" step="100" oninput="autoSave()" />
+          </div>
+          <div class="form-group">
+            <label>Bricks (per 1000 bricks)</label>
+            <input type="number" id="rate_bricks" placeholder="e.g. 12000" step="100" oninput="autoSave()" />
+          </div>
+          <div class="form-group">
+            <label>Tiles (per m²)</label>
+            <input type="number" id="rate_tiles" placeholder="e.g. 1200" step="10" oninput="autoSave()" />
+          </div>
+          <div class="form-group">
+            <label>Earthwork / Excavation (per m³)</label>
+            <input type="number" id="rate_excavation" placeholder="e.g. 800" step="10" oninput="autoSave()" />
+          </div>
+          <div class="form-group">
+            <label>Truck Hire (per trip)</label>
+            <input type="number" id="rate_truck" placeholder="e.g. 5000" step="100" oninput="autoSave()" />
+          </div>
+        </div>
+
+        <div class="btn-group">
+          <button class="btn btn-primary" onclick="saveRates()">💾 Save Rates</button>
+          <button class="btn btn-secondary" onclick="loadDefaultRates()">↺ Load Defaults</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══════ SECTION: UNIT CONVERTER ══════ -->
+    <div class="section-panel" id="section-converter">
+      <div class="section-title">Engineering Unit Converter</div>
+      <div class="section-subtitle">Quick conversion between metric and imperial units</div>
+
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:20px;">
+
+        <!-- Length -->
+        <div class="card">
+          <div class="card-header">
+            <div class="card-icon blue">📏</div>
+            <div><div class="card-title">Length</div></div>
+          </div>
+          <div class="form-grid">
+            <div class="form-group">
+              <label>Meters (m)</label>
+              <input type="number" id="conv_m" step="0.001" oninput="convLength('m')" placeholder="0" />
+            </div>
+            <div class="form-group">
+              <label>Feet (ft)</label>
+              <input type="number" id="conv_ft" step="0.001" oninput="convLength('ft')" placeholder="0" />
+            </div>
+            <div class="form-group">
+              <label>Inches (in)</label>
+              <input type="number" id="conv_in" step="0.01" oninput="convLength('in')" placeholder="0" />
+            </div>
+            <div class="form-group">
+              <label>Millimeters (mm)</label>
+              <input type="number" id="conv_mm" step="0.1" oninput="convLength('mm')" placeholder="0" />
+            </div>
+          </div>
+        </div>
+
+        <!-- Area -->
+        <div class="card">
+          <div class="card-header">
+            <div class="card-icon amber">📐</div>
+            <div><div class="card-title">Area</div></div>
+          </div>
+          <div class="form-grid">
+            <div class="form-group">
+              <label>Square Meters (m²)</label>
+              <input type="number" id="conv_m2" step="0.001" oninput="convArea('m2')" placeholder="0" />
+            </div>
+            <div class="form-group">
+              <label>Square Feet (ft²)</label>
+              <input type="number" id="conv_ft2" step="0.01" oninput="convArea('ft2')" placeholder="0" />
+            </div>
+            <div class="form-group">
+              <label>Square Yards (yd²)</label>
+              <input type="number" id="conv_yd2" step="0.001" oninput="convArea('yd2')" placeholder="0" />
+            </div>
+            <div class="form-group">
+              <label>Marla (Pak/India)</label>
+              <input type="number" id="conv_marla" step="0.001" oninput="convArea('marla')" placeholder="0" />
+            </div>
+          </div>
+        </div>
+
+        <!-- Volume -->
+        <div class="card">
+          <div class="card-header">
+            <div class="card-icon green">📦</div>
+            <div><div class="card-title">Volume</div></div>
+          </div>
+          <div class="form-grid">
+            <div class="form-group">
+              <label>Cubic Meters (m³)</label>
+              <input type="number" id="conv_m3" step="0.001" oninput="convVolume('m3')" placeholder="0" />
+            </div>
+            <div class="form-group">
+              <label>Cubic Feet (ft³)</label>
+              <input type="number" id="conv_ft3" step="0.01" oninput="convVolume('ft3')" placeholder="0" />
+            </div>
+            <div class="form-group">
+              <label>Cubic Yards (yd³)</label>
+              <input type="number" id="conv_yd3" step="0.001" oninput="convVolume('yd3')" placeholder="0" />
+            </div>
+            <div class="form-group">
+              <label>Liters (L)</label>
+              <input type="number" id="conv_liters" step="0.1" oninput="convVolume('liters')" placeholder="0" />
+            </div>
+          </div>
+        </div>
+
+        <!-- Weight -->
+        <div class="card">
+          <div class="card-header">
+            <div class="card-icon purple">⚖️</div>
+            <div><div class="card-title">Weight / Mass</div></div>
+          </div>
+          <div class="form-grid">
+            <div class="form-group">
+              <label>Kilograms (kg)</label>
+              <input type="number" id="conv_kg" step="0.001" oninput="convWeight('kg')" placeholder="0" />
+            </div>
+            <div class="form-group">
+              <label>Pounds (lbs)</label>
+              <input type="number" id="conv_lbs" step="0.01" oninput="convWeight('lbs')" placeholder="0" />
+            </div>
+            <div class="form-group">
+              <label>Metric Tons (t)</label>
+              <input type="number" id="conv_ton" step="0.0001" oninput="convWeight('ton')" placeholder="0" />
+            </div>
+            <div class="form-group">
+              <label>Bags (50kg each)</label>
+              <input type="number" id="conv_bags" step="0.01" oninput="convWeight('bags')" placeholder="0" />
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<!-- ═══════════════════════════════════════════════════
+     MOBILE BOTTOM NAVIGATION BAR
+═══════════════════════════════════════════════════ -->
+<nav class="mobile-bottom-nav" id="mobileBottomNav" aria-label="Mobile Navigation">
+  <button class="mobile-nav-btn active" onclick="switchSection('dashboard')" data-section="dashboard">
+    <span class="m-icon">🏠</span>
+    <span class="m-label">Home</span>
+  </button>
+  <button class="mobile-nav-btn" onclick="switchSection('concrete')" data-section="concrete">
+    <span class="m-icon">🧱</span>
+    <span class="m-label">Concrete</span>
+  </button>
+  <button class="mobile-nav-btn" onclick="switchSection('brickwork')" data-section="brickwork">
+    <span class="m-icon">🏠</span>
+    <span class="m-label">Bricks</span>
+  </button>
+  <button class="mobile-nav-btn" onclick="switchSection('rebar')" data-section="rebar">
+    <span class="m-icon">⚙️</span>
+    <span class="m-label">Rebar</span>
+  </button>
+  <button class="mobile-nav-btn" onclick="switchSection('boq')" data-section="boq">
+    <span class="m-icon" style="position:relative;">📋<span class="m-badge" id="mBoqCount">0</span></span>
+    <span class="m-label">BOQ</span>
+  </button>
+  <button class="mobile-nav-btn" onclick="openModal('aboutModal')">
+    <span class="m-icon">👥</span>
+    <span class="m-label">About</span>
+  </button>
+</nav>
+
+<!-- TOAST CONTAINER -->
+<div class="toast-container" id="toastContainer"></div>
+
+<!-- ═══════════════════════════════════════════════════
+     JAVASCRIPT ENGINE
+═══════════════════════════════════════════════════ -->
+<script>
+'use strict';
+
+// ─────────────────────────────────────────────────────────
+// APP STATE
+// ─────────────────────────────────────────────────────────
+const APP = {
+  theme: 'dark',
+  units: {
+    concrete:    'metric',
+    brickwork:   'metric',
+    plastering:  'metric',
+    rebar:       'metric',
+    excavation:  'metric',
+  },
+  calcCount: 0,
+  boqItems: [],
+  lastResults: {},
+  rates: {
+    cement:      950,
+    sand:        3500,
+    aggregate:   5000,
+    steel:       280000,
+    bricks:      12000,
+    tiles:       1200,
+    excavation:  800,
+    truck:       5000,
+  },
+  currencySymbol: 'PKR',
+};
+
+// ─────────────────────────────────────────────────────────
+// INIT
+// ─────────────────────────────────────────────────────────
+document.addEventListener('DOMContentLoaded', () => {
+  loadState();
+  checkSplash();
+  addRebarRow(); // init with one rebar row
+  renderBOQ();
+  updateDashStats();
+  applyTheme();
+  restoreFormInputs();
+});
+
+// ─────────────────────────────────────────────────────────
+// SPLASH
+// ─────────────────────────────────────────────────────────
+function checkSplash() {
+  const today = new Date().toDateString();
+  const stored = localStorage.getItem('ces_splash_suppress');
+  if (stored === today) {
+    document.getElementById('splash-overlay').classList.add('hidden');
+  }
+}
+
+function closeSplash() {
+  const overlay = document.getElementById('splash-overlay');
+  const dontShow = document.getElementById('dontShowToday').checked;
+  if (dontShow) {
+    localStorage.setItem('ces_splash_suppress', new Date().toDateString());
+  }
+  overlay.style.animation = 'none';
+  overlay.style.opacity = '0';
+  overlay.style.transition = 'opacity .4s ease';
+  setTimeout(() => overlay.classList.add('hidden'), 400);
+}
+
+// ─────────────────────────────────────────────────────────
+// MODALS
+// ─────────────────────────────────────────────────────────
+function openModal(id) {
+  document.getElementById(id).classList.add('active');
+}
+function closeModal(id) {
+  document.getElementById(id).classList.remove('active');
+}
+document.addEventListener('click', e => {
+  if (e.target.classList.contains('modal-overlay')) {
+    e.target.classList.remove('active');
+  }
+});
+
+// ─────────────────────────────────────────────────────────
+// THEME
+// ─────────────────────────────────────────────────────────
+function toggleTheme() {
+  APP.theme = APP.theme === 'dark' ? 'light' : 'dark';
+  applyTheme();
+  localStorage.setItem('ces_theme', APP.theme);
+}
+function applyTheme() {
+  document.documentElement.setAttribute('data-theme', APP.theme);
+  document.getElementById('themeToggle').textContent = APP.theme === 'dark' ? '☀️' : '🌙';
+}
+
+// ─────────────────────────────────────────────────────────
+// SIDEBAR (MOBILE)
+// ─────────────────────────────────────────────────────────
+function toggleSidebar() {
+  document.getElementById('sidebar').classList.toggle('open');
+  document.getElementById('sidebarOverlay').classList.toggle('open');
+}
+function closeSidebar() {
+  document.getElementById('sidebar').classList.remove('open');
+  document.getElementById('sidebarOverlay').classList.remove('open');
+}
+
+// ─────────────────────────────────────────────────────────
+// SECTION NAVIGATION
+// ─────────────────────────────────────────────────────────
+function switchSection(id) {
+  document.querySelectorAll('.section-panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.sidebar-item').forEach(i => i.classList.remove('active'));
+  document.querySelectorAll('.mobile-nav-btn').forEach(b => b.classList.remove('active'));
+
+  const panel = document.getElementById('section-' + id);
+  if (panel) panel.classList.add('active');
+
+  document.querySelectorAll(`.sidebar-item[data-section="${id}"]`).forEach(i => i.classList.add('active'));
+  document.querySelectorAll(`.mobile-nav-btn[data-section="${id}"]`).forEach(b => b.classList.add('active'));
+
+  closeSidebar();
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+// ─────────────────────────────────────────────────────────
+// UNIT SYSTEM
+// ─────────────────────────────────────────────────────────
+function setUnit(module, system, btn) {
+  APP.units[module] = system;
+  btn.closest('.toggle-group').querySelectorAll('.toggle-opt').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  updateUnitLabels(module, system);
+  autoSave();
+}
+
+function updateUnitLabels(module, system) {
+  const m = system === 'metric';
+  const labels = {
+    concrete: {
+      c_unit_l: m ? '(m)' : '(ft)',
+      c_unit_w: m ? '(m)' : '(ft)',
+      c_unit_h: m ? '(m)' : '(ft)',
+      c_unit_d: m ? '(m)' : '(ft)',
+    },
+    brickwork: {
+      bw_unit_l:    m ? '(m)' : '(ft)',
+      bw_unit_h:    m ? '(m)' : '(ft)',
+      bw_unit_open: m ? '(m²)' : '(ft²)',
+    },
+    plastering: {
+      pl_unit_area: m ? '(m²)' : '(ft²)',
+      ti_unit_area: m ? '(m²)' : '(ft²)',
+    },
+    rebar: {
+      rb_unit_dia: m ? '(mm)' : '(in)',
+      rb_unit_len: m ? '(m)' : '(ft)',
+      rb_unit_wt:  m ? '(kg/m)' : '(lbs/ft)',
+    },
+    excavation: {
+      ex_unit_l:     m ? '(m)'  : '(ft)',
+      ex_unit_w:     m ? '(m)'  : '(ft)',
+      ex_unit_d:     m ? '(m)'  : '(ft)',
+      ex_unit_truck: m ? '(m³)' : '(yd³)',
+    },
+  };
+  const map = labels[module] || {};
+  for (const [id, txt] of Object.entries(map)) {
+    const el = document.getElementById(id);
+    if (el) el.textContent = txt;
+  }
+}
+
+// ─────────────────────────────────────────────────────────
+// VALIDATION HELPERS
+// ─────────────────────────────────────────────────────────
+function validatePositive(inputId, errId) {
+  const inp = document.getElementById(inputId);
+  const err = document.getElementById(errId);
+  const val = parseFloat(inp.value);
+  if (!inp.value || isNaN(val) || val <= 0) {
+    inp.classList.add('invalid');
+    if (err) err.classList.add('visible');
+    return false;
+  }
+  inp.classList.remove('invalid');
+  if (err) err.classList.remove('visible');
+  return true;
+}
+
+function clearValidation(inputId, errId) {
+  const inp = document.getElementById(inputId);
+  const err = document.getElementById(errId);
+  inp && inp.classList.remove('invalid');
+  err && err.classList.remove('visible');
+}
+
+function gv(id) { // get numeric value
+  return parseFloat(document.getElementById(id)?.value) || 0;
+}
+
+function gs(id) { // get string value
+  return document.getElementById(id)?.value || '';
+}
+
+// ─────────────────────────────────────────────────────────
+// NUMBER FORMATTING
+// ─────────────────────────────────────────────────────────
+function fmt(n, dec = 2) {
+  return parseFloat(n.toFixed(dec)).toLocaleString('en-PK', { minimumFractionDigits: dec, maximumFractionDigits: dec });
+}
+function fmtCost(n) {
+  return APP.currencySymbol + ' ' + Math.round(n).toLocaleString('en-PK');
+}
+
+// ─────────────────────────────────────────────────────────
+// RESULT PANEL BUILDER
+// ─────────────────────────────────────────────────────────
+function showResults(panelId, gridId, items) {
+  const panel = document.getElementById(panelId);
+  const grid  = document.getElementById(gridId);
+  grid.innerHTML = items.map(item => `
+    <div class="result-item">
+      <div class="result-label">${item.label}</div>
+      <div class="result-value ${item.cls || ''}">${item.value}<span class="result-unit">${item.unit || ''}</span></div>
+    </div>
+  `).join('');
+  panel.classList.add('visible');
+  panel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+}
+
+// ─────────────────────────────────────────────────────────
+// TOAST NOTIFICATIONS
+// ─────────────────────────────────────────────────────────
+function toast(msg, type = 'success') {
+  const container = document.getElementById('toastContainer');
+  const div = document.createElement('div');
+  const icons = { success: '✅', error: '❌', info: 'ℹ️' };
+  div.className = `toast ${type}`;
+  div.innerHTML = `<span>${icons[type]}</span><span>${msg}</span>`;
+  container.appendChild(div);
+  setTimeout(() => { div.style.opacity = '0'; div.style.transition = 'opacity .3s'; setTimeout(() => div.remove(), 300); }, 3000);
+}
+
+// ─────────────────────────────────────────────────────────
+// CONCRETE & RCC CALCULATOR
+// ─────────────────────────────────────────────────────────
+function onMixChange() {
+  const val = gs('c_mixRatio');
+  document.getElementById('customMixRow').style.display = val === 'custom' ? 'grid' : 'none';
+}
+
+function calcConcrete() {
+  // Validate
+  const memberType = gs('c_memberType');
+  const isCircular = memberType.includes('circular');
+  let valid = true;
+
+  if (isCircular) {
+    const v1 = validatePositive('c_diameter', 'c_diam_err');
+    const v2 = validatePositive('c_depth', 'c_depth_err');
+    valid = v1 && v2;
+    if (!gv('c_diameter')) { valid = false; toast('Enter diameter', 'error'); return; }
+  } else {
+    const v1 = validatePositive('c_length', 'c_length_err');
+    const v2 = validatePositive('c_width', 'c_width_err');
+    const v3 = validatePositive('c_depth', 'c_depth_err');
+    valid = v1 && v2 && v3;
+  }
+  if (!valid) return;
+
+  const isMetric    = APP.units.concrete === 'metric';
+  const toM         = isMetric ? 1 : 0.3048; // ft→m
+  const length      = gv('c_length')    * toM;
+  const width       = gv('c_width')     * toM;
+  const depth       = gv('c_depth')     * toM;
+  const diameter    = gv('c_diameter')  * toM;
+  const count       = Math.max(1, gv('c_count'));
+  const dryFactor   = gv('c_dryFactor') || 1.54;
+  const wastagePct  = gv('c_wastage')   / 100;
+
+  // Wet Volume
+  let wetVol;
+  if (isCircular) {
+    wetVol = Math.PI / 4 * diameter * diameter * depth * count;
+  } else {
+    wetVol = length * width * depth * count;
+  }
+  wetVol *= (1 + wastagePct);
+
+  // Mix ratio
+  let cPart, sPart, aPart;
+  const mixVal = gs('c_mixRatio');
+  if (mixVal === 'custom') {
+    cPart = gv('c_cement_part') || 1;
+    sPart = gv('c_sand_part')   || 2;
+    aPart = gv('c_agg_part')    || 4;
+  } else {
+    const parts = mixVal.split(':').map(Number);
+    [cPart, sPart, aPart] = parts;
+  }
+  const totalParts = cPart + sPart + aPart;
+
+  const dryVol = wetVol * dryFactor;
+  const cVol   = (cPart / totalParts) * dryVol; // m³ of cement
+  const sVol   = (sPart / totalParts) * dryVol; // m³ of sand
+  const aVol   = (aPart / totalParts) * dryVol; // m³ of aggregate
+
+  // Cement bags: 1 bag (50kg) = 0.0347 m³
+  const cBags = cVol / 0.0347;
+  const sWeight = sVol * 1600; // kg, bulk density sand ≈ 1600 kg/m³
+  const aWeight = aVol * 1500; // kg, aggregate ≈ 1500 kg/m³
+  const waterLiters = cBags * 50 * 0.45; // w/c ratio 0.45
+
+  const volUnit = isMetric ? 'm³' : 'ft³';
+  const wetVolDisplay = isMetric ? wetVol : wetVol * 35.3147;
+
+  APP.lastResults.concrete = { wetVol, dryVol, cBags, sVol, sWeight, aVol, aWeight, waterLiters, mixVal, memberType, count };
+  APP.calcCount++;
+
+  showResults('res-concrete', 'res-concrete-grid', [
+    { label: 'Wet Volume',         value: fmt(wetVolDisplay),    unit: volUnit,  cls: 'result-accent' },
+    { label: 'Dry Volume',         value: fmt(isMetric ? dryVol : dryVol*35.3147), unit: volUnit, cls: 'result-cyan' },
+    { label: 'Cement Required',    value: fmt(cBags, 1),         unit: 'bags (50kg)', cls: 'result-amber' },
+    { label: 'Sand Volume',        value: fmt(isMetric ? sVol : sVol*35.3147), unit: volUnit, cls: 'result-green' },
+    { label: 'Sand Weight',        value: fmt(isMetric ? sWeight : sWeight*2.205, 0), unit: isMetric?'kg':'lbs', cls: 'result-green' },
+    { label: 'Aggregate Volume',   value: fmt(isMetric ? aVol : aVol*35.3147), unit: volUnit, cls: 'result-purple' },
+    { label: 'Aggregate Weight',   value: fmt(isMetric ? aWeight : aWeight*2.205, 0), unit: isMetric?'kg':'lbs', cls: 'result-purple' },
+    { label: 'Water Requirement',  value: fmt(waterLiters, 0),   unit: 'Liters', cls: 'result-blue' },
+  ]);
+  updateDashStats();
+  toast('Concrete calculation complete!');
+}
+
+// ─────────────────────────────────────────────────────────
+// BRICKWORK CALCULATOR
+// ─────────────────────────────────────────────────────────
+document.addEventListener('change', function(e) {
+  if (e.target.id === 'bw_thickness') {
+    document.getElementById('bw_custom_thick_group').style.display =
+      e.target.value === 'custom' ? 'flex' : 'none';
+  }
+  if (e.target.id === 'bw_brickStd') {
+    document.getElementById('bw_custom_brick_group').style.display =
+      e.target.value === 'custom' ? 'flex' : 'none';
+  }
+  if (e.target.id === 'pl_thickness') {
+    document.getElementById('pl_custom_thick_group').style.display =
+      e.target.value === 'custom' ? 'flex' : 'none';
+  }
+});
+
+function calcBrickwork() {
+  const v1 = validatePositive('bw_length', 'bw_length_err');
+  const v2 = validatePositive('bw_height', 'bw_height_err');
+  const valid = v1 && v2;
+  if (!valid) return;
+
+  const isMetric = APP.units.brickwork === 'metric';
+  const toM = isMetric ? 1 : 0.3048;
+
+  const length   = gv('bw_length') * toM;
+  const height   = gv('bw_height') * toM;
+  const openings = gv('bw_openings') * (isMetric ? 1 : 0.0929);
+
+  // Wall thickness
+  let thickM;
+  if (gs('bw_thickness') === 'custom') {
+    thickM = (gv('bw_custom_thick') || 230) / 1000;
+  } else {
+    thickM = parseFloat(gs('bw_thickness'));
+  }
+
+  // Brick size (mm → m)
+  let bL, bW, bH;
+  const std = gs('bw_brickStd');
+  if (std === 'custom') {
+    const parts = gs('bw_custom_brick').split(',').map(Number);
+    bL = (parts[0] || 230) / 1000;
+    bW = (parts[1] || 115) / 1000;
+    bH = (parts[2] || 75)  / 1000;
+  } else {
+    const dims = std.split('x').map(Number);
+    bL = dims[0]/1000; bW = dims[1]/1000; bH = dims[2]/1000;
+  }
+
+  const mT = (gv('bw_mortarThick') || 10) / 1000; // mortar thickness m
+  const wastage = gv('bw_wastage') / 100;
+
+  // Net wall volume
+  const wallArea = length * height - openings;
+  const wallVol  = wallArea * thickM;
+
+  // Bricks per m³
+  const brickVol = (bL + mT) * (bW + mT) * (bH + mT);
+  const bricksPerM3 = 1 / brickVol;
+  const totalBricks = Math.ceil(bricksPerM3 * wallVol * (1 + wastage));
+
+  // Mortar volume
+  const netBrickVol = totalBricks * (bL * bW * bH);
+  const mortarWet   = wallVol - netBrickVol;
+  const mortarDry   = mortarWet * 1.33;
+
+  // Mix ratio
+  const mixParts = gs('bw_mortarMix').split(':').map(Number);
+  const cPart = mixParts[0], sPart = mixParts[1];
+  const total = cPart + sPart;
+  const cVol = (cPart / total) * mortarDry;
+  const sVol = (sPart / total) * mortarDry;
+  const cBags = cVol / 0.0347;
+  const sandWeight = sVol * 1600;
+
+  APP.lastResults.brickwork = { totalBricks, cBags, sVol, sandWeight, wallVol, wallArea };
+  APP.calcCount++;
+
+  showResults('res-brickwork', 'res-brickwork-grid', [
+    { label: 'Net Wall Volume',  value: fmt(isMetric ? wallVol  : wallVol*35.3147,  2), unit: isMetric?'m³':'ft³', cls: 'result-accent' },
+    { label: 'Wall Area',        value: fmt(isMetric ? wallArea : wallArea*10.7639, 2), unit: isMetric?'m²':'ft²', cls: 'result-cyan' },
+    { label: 'No. of Bricks',   value: fmt(totalBricks, 0),     unit: 'bricks',        cls: 'result-amber' },
+    { label: 'Cement Required', value: fmt(cBags, 1),           unit: 'bags (50kg)',   cls: 'result-green' },
+    { label: 'Sand Volume',     value: fmt(isMetric ? sVol : sVol*35.3147, 3), unit: isMetric?'m³':'ft³', cls: 'result-green' },
+    { label: 'Sand Weight',     value: fmt(isMetric ? sandWeight : sandWeight*2.205, 0), unit: isMetric?'kg':'lbs', cls: 'result-purple' },
+    { label: 'Mortar Volume',   value: fmt(isMetric ? mortarWet : mortarWet*35.3147, 3), unit: isMetric?'m³':'ft³', cls: 'result-orange' },
+  ]);
+  updateDashStats();
+  toast('Brickwork calculation complete!');
+}
+
+// ─────────────────────────────────────────────────────────
+// PLASTERING & FLOORING
+// ─────────────────────────────────────────────────────────
+function calcPlastering() {
+  if (!validatePositive('pl_area', 'pl_area_err')) return;
+
+  const isMetric = APP.units.plastering === 'metric';
+  const toM2 = isMetric ? 1 : 0.0929; // ft² → m²
+
+  const area    = gv('pl_area') * toM2;
+  const coats   = Math.max(1, gv('pl_coats'));
+  const wastage = gv('pl_wastage') / 100;
+
+  let thick;
+  if (gs('pl_thickness') === 'custom') {
+    thick = (gv('pl_custom_thick') || 15) / 1000;
+  } else {
+    thick = parseFloat(gs('pl_thickness'));
+  }
+
+  const totalArea = area * coats * (1 + wastage);
+  const mortarWet = totalArea * thick;
+  const mortarDry = mortarWet * 1.30; // dry volume factor for plaster
+
+  const mixParts = gs('pl_mixRatio').split(':').map(Number);
+  const cPart = mixParts[0], sPart = mixParts[1];
+  const tot = cPart + sPart;
+  const cVol = (cPart / tot) * mortarDry;
+  const sVol = (sPart / tot) * mortarDry;
+  const cBags = cVol / 0.0347;
+  const sandWeight = sVol * 1600;
+
+  APP.lastResults.plastering = { area, coats, thick, cBags, sVol, sandWeight };
+  APP.calcCount++;
+
+  showResults('res-plastering', 'res-plastering-grid', [
+    { label: 'Plaster Area',    value: fmt(isMetric ? area   : area/0.0929, 2),   unit: isMetric?'m²':'ft²', cls: 'result-accent' },
+    { label: 'Thickness',       value: fmt(thick * 1000, 0),                       unit: 'mm' },
+    { label: 'Mortar Volume',   value: fmt(mortarWet, 4),                          unit: 'm³',                cls: 'result-cyan' },
+    { label: 'Cement Required', value: fmt(cBags, 2),                              unit: 'bags',              cls: 'result-amber' },
+    { label: 'Sand Volume',     value: fmt(sVol, 3),                               unit: 'm³',                cls: 'result-green' },
+    { label: 'Sand Weight',     value: fmt(sandWeight, 0),                         unit: 'kg',                cls: 'result-green' },
+  ]);
+  updateDashStats();
+  toast('Plastering calculation complete!');
+}
+
+function calcTiles() {
+  if (!validatePositive('ti_area', 'ti_area_err')) return;
+
+  const isMetric = APP.units.plastering === 'metric';
+  const areaM2 = gv('ti_area') * (isMetric ? 1 : 0.0929);
+
+  const tL = (gv('ti_length') || 600) / 1000; // mm → m
+  const tW = (gv('ti_width')  || 600) / 1000;
+  const jG = (gv('ti_joint')  || 3)   / 1000;
+  const wastage = gv('ti_wastage') / 100;
+
+  const tileArea = (tL + jG) * (tW + jG);
+  const tileCount = Math.ceil(areaM2 / tileArea * (1 + wastage));
+  const crates = Math.ceil(tileCount / 12); // typical 12 tiles/crate for 600×600
+
+  APP.lastResults.tiles = { areaM2, tileCount, crates, tileArea };
+  APP.calcCount++;
+
+  showResults('res-tiles', 'res-tiles-grid', [
+    { label: 'Tile Area (each)', value: fmt(tileArea * 10000, 2), unit: 'cm²',      cls: 'result-accent' },
+    { label: 'Tile Count',       value: fmt(tileCount, 0),        unit: 'tiles',     cls: 'result-amber' },
+    { label: 'Crates (12/crt)', value: fmt(crates, 0),           unit: 'crates',    cls: 'result-green' },
+    { label: 'Total Floor Area', value: fmt(isMetric ? areaM2 : areaM2/0.0929, 2), unit: isMetric?'m²':'ft²', cls: 'result-cyan' },
+  ]);
+  updateDashStats();
+  toast('Tile estimation complete!');
+}
+
+// ─────────────────────────────────────────────────────────
+// REBAR CALCULATOR
+// ─────────────────────────────────────────────────────────
+let rebarRowCount = 0;
+
+function addRebarRow() {
+  rebarRowCount++;
+  const tbody = document.getElementById('rebarBody');
+  const tr = document.createElement('tr');
+  tr.id = `rebar-row-${rebarRowCount}`;
+  tr.className = 'rebar-row';
+  tr.innerHTML = `
+    <td style="text-align:center;font-weight:600;color:var(--text-muted);">${rebarRowCount}</td>
+    <td class="td-input"><input type="text" placeholder="e.g. Main bars – Slab" style="min-width:140px;" oninput="autoSave()" /></td>
+    <td class="td-input"><input type="number" value="12" min="6" max="50" step="2" class="rebar-dia" oninput="updateRebarWeight(this);autoSave();" style="width:70px;" /></td>
+    <td class="td-input"><input type="number" value="1"  min="1" step="1"  class="rebar-nos" oninput="autoSave();" style="width:60px;" /></td>
+    <td class="td-input"><input type="number" value="6"  min="0.1" step="0.1" class="rebar-len" oninput="autoSave();" style="width:80px;" /></td>
+    <td class="td-input"><input type="number" step="0.001" class="rebar-uw" readonly style="background:var(--bg-elevated);width:80px;" /></td>
+    <td class="td-input td-number"><span class="rebar-total-wt" style="font-weight:700;">—</span></td>
+    <td style="text-align:center;"><button class="delete-row-btn" onclick="deleteRebarRow('rebar-row-${rebarRowCount}')">🗑️</button></td>
+  `;
+  tbody.appendChild(tr);
+  // Trigger unit weight init
+  const diaInput = tr.querySelector('.rebar-dia');
+  updateRebarWeight(diaInput);
+}
+
+function updateRebarWeight(diaInput) {
+  const isMetric = APP.units.rebar === 'metric';
+  const dia = parseFloat(diaInput.value) || 0;
+  let uw;
+  if (isMetric) {
+    uw = (dia * dia) / 162; // kg/m
+  } else {
+    // dia in inches, use d²/24 for lbs/ft where d is bar number/8
+    const diaInch = dia;
+    uw = (diaInch * diaInch) / 24;
+  }
+  const row = diaInput.closest('tr');
+  row.querySelector('.rebar-uw').value = uw.toFixed(4);
+}
+
+function deleteRebarRow(rowId) {
+  const row = document.getElementById(rowId);
+  if (row) row.remove();
+}
+
+function clearRebarTable() {
+  document.getElementById('rebarBody').innerHTML = '';
+  rebarRowCount = 0;
+  document.getElementById('res-rebar').classList.remove('visible');
+  addRebarRow();
+}
+
+function calcRebar() {
+  const isMetric = APP.units.rebar === 'metric';
+  const rows = document.querySelectorAll('#rebarBody tr.rebar-row');
+  if (!rows.length) { toast('Add at least one rebar row', 'error'); return; }
+
+  let totalKg = 0;
+  rows.forEach(row => {
+    const dia = parseFloat(row.querySelector('.rebar-dia').value) || 0;
+    const nos = parseFloat(row.querySelector('.rebar-nos').value) || 0;
+    const len = parseFloat(row.querySelector('.rebar-len').value) || 0;
+    let uw, rowWt;
+    if (isMetric) {
+      uw = (dia * dia) / 162;
+      rowWt = uw * nos * len; // rowWt in kg
+    } else {
+      uw = (dia * dia) / 24; // uw in lbs/ft
+      const uw_kg_per_m = uw * 1.4882;
+      rowWt = uw_kg_per_m * nos * (len * 0.3048); // rowWt in kg
+    }
+    row.querySelector('.rebar-uw').value = uw.toFixed(4);
+    totalKg += rowWt;
+    const span = row.querySelector('.rebar-total-wt');
+    span.textContent = fmt(isMetric ? rowWt : rowWt / 0.4536, 2) + (isMetric ? ' kg' : ' lbs');
+  });
+
+  const totalKgFinal = totalKg;
+  const totalTons = totalKgFinal / 1000;
+  const bars12m = totalKgFinal / (12*12/162*12);
+
+  APP.lastResults.rebar = { totalKg: totalKgFinal, totalTons };
+  APP.calcCount++;
+
+  showResults('res-rebar', 'res-rebar-grid', [
+    { label: 'Total Weight',    value: fmt(isMetric ? totalKgFinal : totalKgFinal / 0.4536, 2),  unit: isMetric?'kg':'lbs',   cls: 'result-accent' },
+    { label: 'Total Tonnage',   value: fmt(totalTons, 4),     unit: 'Metric Tons',          cls: 'result-amber' },
+    { label: 'Weight per Member', value: fmt((isMetric ? totalKgFinal : totalKgFinal / 0.4536) / Math.max(rows.length,1), 2), unit: isMetric?'kg':'lbs', cls: 'result-cyan' },
+    { label: '12m Bar Count',  value: fmt(bars12m, 0),       unit: 'bars (12m std.)',      cls: 'result-green' },
+    { label: '40ft Bar Count (12mm)', value: fmt(totalKgFinal / ((12*12/162) * 12.192), 0), unit: 'bars est.', cls: 'result-purple' },
+  ]);
+  updateDashStats();
+  toast('Rebar calculation complete!');
+}
+
+// ─────────────────────────────────────────────────────────
+// EXCAVATION CALCULATOR
+// ─────────────────────────────────────────────────────────
+function toggleExcavationType() {
+  const type = gs('ex_type');
+  const label = document.querySelector('#ex_l_group label');
+  if (type === 'area') {
+    label.innerText = 'Total Area (m²)';
+  } else {
+    label.innerText = 'Length';
+  }
+  document.getElementById('ex_l_group').style.display = 'flex';
+}
+
+function updateSwellFactor() {
+  const val = gs('ex_soilClass');
+  const isCustom = val === 'custom';
+  document.getElementById('ex_custom_swell_group').style.display = isCustom ? 'flex' : 'none';
+  if (!isCustom) {
+    document.getElementById('ex_swellFactor').value = val;
+  }
+}
+
+function calcExcavation() {
+  const type   = gs('ex_type');
+  let valid = validatePositive('ex_width', 'ex_width_err') &
+              validatePositive('ex_depth', 'ex_depth_err');
+  if (type !== 'area') { valid = validatePositive('ex_length', 'ex_length_err') & valid; }
+  if (!valid) return;
+
+  const isMetric = APP.units.excavation === 'metric';
+  const toM = isMetric ? 1 : 0.3048;
+  const toM3_truck = isMetric ? 1 : 0.7646; // yd³ → m³
+
+  const length = (type === 'area' ? 1 : gv('ex_length')) * toM;
+  const width  = gv('ex_width') * toM;
+  const depth  = gv('ex_depth') * toM;
+  const count  = Math.max(1, gv('ex_count'));
+  const slope  = parseFloat(gs('ex_slope'));
+  const swell  = gs('ex_soilClass') === 'custom' ? gv('ex_custom_swell') : parseFloat(gs('ex_soilClass'));
+  const truckCap = gv('ex_truckCap') * toM3_truck;
+
+  // Bank Volume (prismatoid with slope)
+  let bankVol;
+  if (type === 'area') {
+    const area = gv('ex_length') * (isMetric ? 1 : 0.0929);
+    bankVol = area * depth;
+  } else {
+    const topWidth  = width  + 2 * slope * depth;
+    const topLength = length + 2 * slope * depth;
+    // Average end area method
+    bankVol = ((length * width) + (topLength * topWidth)) / 2 * depth;
+  }
+  bankVol *= count;
+
+  const looseVol = bankVol * swell;
+  const truckLoads = Math.ceil(looseVol / truckCap);
+  const earthRemove = looseVol - bankVol;
+
+  const vUnit = isMetric ? 'm³' : 'yd³';
+  const toDisplay = isMetric ? 1 : 1/0.7646;
+
+  APP.lastResults.excavation = { bankVol, looseVol, truckLoads, earthRemove };
+  APP.calcCount++;
+
+  showResults('res-excavation', 'res-excavation-grid', [
+    { label: 'Bank (In-situ) Volume', value: fmt(bankVol * toDisplay, 2),    unit: vUnit, cls: 'result-accent' },
+    { label: 'Loose Volume (Hauled)', value: fmt(looseVol * toDisplay, 2),   unit: vUnit, cls: 'result-amber' },
+    { label: 'Extra Earth (Swell)',   value: fmt(earthRemove * toDisplay, 2), unit: vUnit, cls: 'result-cyan' },
+    { label: 'Swell Factor Applied',  value: fmt(swell, 2),                   unit: 'x',  cls: 'result-green' },
+    { label: 'Truck Loads (est.)',    value: fmt(truckLoads, 0),              unit: 'trips', cls: 'result-red' },
+    { label: 'Truck Capacity',        value: fmt(truckCap * toDisplay, 1),   unit: vUnit, cls: 'result-purple' },
+  ]);
+  updateDashStats();
+  toast('Excavation calculation complete!');
+}
+
+// ─────────────────────────────────────────────────────────
+// BOQ MANAGEMENT
+// ─────────────────────────────────────────────────────────
+function addToBOQ(module) {
+  const res = APP.lastResults[module];
+  if (!res) { toast('Run the calculation first!', 'error'); return; }
+
+  const currency = APP.currencySymbol;
+  const rates    = APP.rates;
+  let desc, qty, unit, rate;
+
+  switch (module) {
+    case 'concrete':
+      desc = `Concrete (${res.mixVal || 'RCC'}) — ${res.memberType} × ${res.count}`;
+      qty  = parseFloat(res.wetVol.toFixed(3));
+      unit = 'm³';
+      // Simplified: use per-unit cost from components
+      rate = ((rates.cement * res.cBags) + (rates.sand * res.sVol) + (rates.aggregate * res.aVol)) / res.wetVol;
+      break;
+    case 'brickwork':
+      desc = `Brickwork — ${fmt(res.wallArea,2)} m² wall area`;
+      qty  = res.totalBricks;
+      unit = 'bricks';
+      rate = rates.bricks / 1000;
+      break;
+    case 'plastering':
+      desc = `Plastering — ${fmt(res.area,2)} m²`;
+      qty  = parseFloat(res.area.toFixed(2));
+      unit = 'm²';
+      rate = (rates.cement * res.cBags + rates.sand * res.sVol) / res.area;
+      break;
+    case 'tiles':
+      desc = `Floor/Wall Tiles — ${res.tileCount} tiles`;
+      qty  = parseFloat(res.areaM2.toFixed(2));
+      unit = 'm²';
+      rate = rates.tiles;
+      break;
+    case 'rebar':
+      desc = `Reinforcement Steel`;
+      qty  = parseFloat((res.totalTons).toFixed(4));
+      unit = 'MT';
+      rate = rates.steel;
+      break;
+    case 'excavation':
+      desc = `Excavation & Earthwork`;
+      qty  = parseFloat(res.bankVol.toFixed(3));
+      unit = 'm³';
+      rate = rates.excavation;
+      break;
+    default:
+      return;
+  }
+
+  const item = { id: Date.now(), desc, qty: parseFloat(qty) || 0, unit, rate: parseFloat(rate) || 0 };
+  APP.boqItems.push(item);
+  renderBOQ();
+  saveBOQToStorage();
+  updateDashStats();
+  toast(`Added to BOQ: ${desc.substring(0, 40)}...`);
+  switchSection('boq');
+}
+
+function addManualBOQRow() {
+  const item = { id: Date.now(), desc: 'Manual Item', qty: 1, unit: 'LS', rate: 0 };
+  APP.boqItems.push(item);
+  renderBOQ();
+  saveBOQToStorage();
+}
+
+function clearBOQ() {
+  if (!confirm('Clear all BOQ items?')) return;
+  APP.boqItems = [];
+  renderBOQ();
+  saveBOQToStorage();
+  updateDashStats();
+  toast('BOQ cleared', 'info');
+}
+
+function renderBOQ() {
+  const tbody = document.getElementById('boqBody');
+  if (APP.boqItems.length === 0) {
+    tbody.innerHTML = `<tr id="boq-empty-row"><td colspan="7" style="text-align:center;color:var(--text-muted);padding:24px;font-style:italic;">No items yet. Calculate from a module and click "Add to BOQ", or add manually below.</td></tr>`;
+    recalcBOQCosts();
+    return;
+  }
+
+  tbody.innerHTML = APP.boqItems.map((item, i) => `
+    <tr data-id="${item.id}">
+      <td style="text-align:center;font-weight:600;color:var(--text-muted);">${i+1}</td>
+      <td class="td-input">
+        <input type="text" value="${escHtml(item.desc)}" style="min-width:180px;"
+          onchange="updateBOQItem(${item.id}, 'desc', this.value)" />
+      </td>
+      <td class="td-input">
+        <input type="number" value="${item.qty}" step="0.01" style="width:90px;"
+          onchange="updateBOQItem(${item.id}, 'qty', this.value); recalcBOQCosts();" />
+      </td>
+      <td class="td-input">
+        <input type="text" value="${escHtml(item.unit)}" style="width:70px;"
+          onchange="updateBOQItem(${item.id}, 'unit', this.value)" />
+      </td>
+      <td class="td-input">
+        <input type="number" value="${item.rate}" step="0.01" style="width:110px;"
+          onchange="updateBOQItem(${item.id}, 'rate', this.value); recalcBOQCosts();" />
+      </td>
+      <td class="td-number" id="boq-amt-${item.id}" style="font-weight:700;color:var(--accent-green);">
+        ${fmtCost(item.qty * item.rate)}
+      </td>
+      <td style="text-align:center;">
+        <button class="delete-row-btn" onclick="removeBOQItem(${item.id})">🗑️</button>
+      </td>
+    </tr>
+  `).join('');
+
+  recalcBOQCosts();
+  document.getElementById('boqItemCount').textContent = APP.boqItems.length;
+}
+
+function escHtml(str) {
+  return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+function updateBOQItem(id, field, val) {
+  const item = APP.boqItems.find(i => i.id === id);
+  if (!item) return;
+  if (field === 'qty' || field === 'rate') item[field] = parseFloat(val) || 0;
+  else item[field] = val;
+  // Update amount cell
+  const amt = document.getElementById(`boq-amt-${id}`);
+  if (amt) amt.textContent = fmtCost(item.qty * item.rate);
+  saveBOQToStorage();
+}
+
+function removeBOQItem(id) {
+  APP.boqItems = APP.boqItems.filter(i => i.id !== id);
+  renderBOQ();
+  saveBOQToStorage();
+  updateDashStats();
+}
+
+function recalcBOQCosts() {
+  const subtotal     = APP.boqItems.reduce((s, i) => s + i.qty * i.rate, 0);
+  const laborPct     = (gv('laborPct') || 15) / 100;
+  const contingPct   = (gv('contingencyPct') || 5) / 100;
+  const taxPct       = (gv('taxPct') || 18) / 100;
+  const laborAmt     = subtotal * laborPct;
+  const contingAmt   = (subtotal + laborAmt) * contingPct;
+  const taxAmt       = (subtotal + laborAmt + contingAmt) * taxPct;
+  const grandTotal   = subtotal + laborAmt + contingAmt + taxAmt;
+
+  document.getElementById('costSubtotal').textContent   = fmtCost(subtotal);
+  document.getElementById('costLabor').textContent       = fmtCost(laborAmt);
+  document.getElementById('costContingency').textContent = fmtCost(contingAmt);
+  document.getElementById('costTax').textContent         = fmtCost(taxAmt);
+  document.getElementById('costGrandTotal').textContent  = fmtCost(grandTotal);
+
+  document.getElementById('statCost').textContent = APP.currencySymbol + ' ' + Math.round(grandTotal).toLocaleString('en-PK');
+  saveBOQToStorage();
+}
+
+// ─────────────────────────────────────────────────────────
+// RATE CONFIG
+// ─────────────────────────────────────────────────────────
+function saveRates() {
+  APP.rates.cement      = gv('rate_cement')     || APP.rates.cement;
+  APP.rates.sand        = gv('rate_sand')       || APP.rates.sand;
+  APP.rates.aggregate   = gv('rate_aggregate')  || APP.rates.aggregate;
+  APP.rates.steel       = gv('rate_steel')      || APP.rates.steel;
+  APP.rates.bricks      = gv('rate_bricks')     || APP.rates.bricks;
+  APP.rates.tiles       = gv('rate_tiles')      || APP.rates.tiles;
+  APP.rates.excavation  = gv('rate_excavation') || APP.rates.excavation;
+  APP.rates.truck       = gv('rate_truck')      || APP.rates.truck;
+  APP.currencySymbol    = gs('currencySymbol')  || 'PKR';
+  autoSave();
+  toast('Rates saved successfully!');
+}
+
+function loadDefaultRates() {
+  const defaults = { cement:950, sand:3500, aggregate:5000, steel:280000, bricks:12000, tiles:1200, excavation:800, truck:5000 };
+  for (const [k, v] of Object.entries(defaults)) {
+    const el = document.getElementById(`rate_${k}`);
+    if (el) el.value = v;
+  }
+  toast('Default rates loaded', 'info');
+}
+
+// ─────────────────────────────────────────────────────────
+// UNIT CONVERTERS
+// ─────────────────────────────────────────────────────────
+function convLength(from) {
+  const vals = { m: 1, ft: 0.3048, in: 0.0254, mm: 0.001 };
+  const v = parseFloat(document.getElementById(`conv_${from}`).value) || 0;
+  const inMeters = v * (vals[from] || 1);
+  for (const [unit, factor] of Object.entries(vals)) {
+    if (unit !== from) document.getElementById(`conv_${unit}`).value = roundSig(inMeters / factor, 6);
+  }
+}
+
+function convArea(from) {
+  const vals = { m2: 1, ft2: 0.092903, yd2: 0.836127, marla: 25.2929 };
+  const v = parseFloat(document.getElementById(`conv_${from}`).value) || 0;
+  const inM2 = v * (vals[from] || 1);
+  for (const [unit, factor] of Object.entries(vals)) {
+    if (unit !== from) document.getElementById(`conv_${unit}`).value = roundSig(inM2 / factor, 6);
+  }
+}
+
+function convVolume(from) {
+  const vals = { m3: 1, ft3: 0.0283168, yd3: 0.764555, liters: 0.001 };
+  const v = parseFloat(document.getElementById(`conv_${from}`).value) || 0;
+  const inM3 = v * (vals[from] || 1);
+  for (const [unit, factor] of Object.entries(vals)) {
+    if (unit !== from) document.getElementById(`conv_${unit}`).value = roundSig(inM3 / factor, 6);
+  }
+}
+
+function convWeight(from) {
+  const vals = { kg: 1, lbs: 0.453592, ton: 1000, bags: 50 };
+  const v = parseFloat(document.getElementById(`conv_${from}`).value) || 0;
+  const inKg = v * (vals[from] || 1);
+  for (const [unit, factor] of Object.entries(vals)) {
+    if (unit !== from) document.getElementById(`conv_${unit}`).value = roundSig(inKg / factor, 6);
+  }
+}
+
+function roundSig(n, sig) {
+  if (n === 0) return 0;
+  const d = Math.ceil(Math.log10(Math.abs(n)));
+  const power = sig - d;
+  const magnitude = Math.pow(10, power);
+  return Math.round(n * magnitude) / magnitude;
+}
+
+// ─────────────────────────────────────────────────────────
+// DASHBOARD STATS
+// ─────────────────────────────────────────────────────────
+function updateDashStats() {
+  const count = APP.boqItems.length;
+  const statEl = document.getElementById('statBOQ');
+  if (statEl) statEl.textContent = count;
+  const calcEl = document.getElementById('statCalcs');
+  if (calcEl) calcEl.textContent = APP.calcCount;
+  const badgeEl = document.getElementById('boqItemCount');
+  if (badgeEl) badgeEl.textContent = count;
+  const mBadgeEl = document.getElementById('mBoqCount');
+  if (mBadgeEl) mBadgeEl.textContent = count;
+}
+
+// ─────────────────────────────────────────────────────────
+// AUTO SAVE / LOCAL STORAGE
+// ─────────────────────────────────────────────────────────
+let autoSaveTimer = null;
+function autoSave() {
+  if (autoSaveTimer) clearTimeout(autoSaveTimer);
+  autoSaveTimer = setTimeout(() => {
+    const state = {
+      theme:        APP.theme,
+      units:        APP.units,
+      calcCount:    APP.calcCount,
+      boqItems:     APP.boqItems,
+      rates:        APP.rates,
+      currencySymbol: APP.currencySymbol,
+      formData:     collectFormData(),
+    };
+    try { localStorage.setItem('ces_state_v2', JSON.stringify(state)); } catch(e) {}
+  }, 500);
+}
+
+function collectFormData() {
+  const fields = [
+    'projectName','projectLocation','projectEngineer',
+    'c_memberType','c_mixRatio','c_length','c_width','c_depth','c_diameter','c_count','c_dryFactor','c_wastage',
+    'c_cement_part','c_sand_part','c_agg_part',
+    'bw_length','bw_height','bw_thickness','bw_mortarThick','bw_mortarMix','bw_wastage','bw_openings',
+    'pl_area','pl_thickness','pl_mixRatio','pl_wastage','pl_coats',
+    'ti_area','ti_length','ti_width','ti_joint','ti_wastage',
+    'ex_type','ex_length','ex_width','ex_depth','ex_soilClass','ex_swellFactor','ex_truckCap','ex_count','ex_slope',
+    'laborPct','contingencyPct','taxPct',
+    'rate_cement','rate_sand','rate_aggregate','rate_steel','rate_bricks','rate_tiles','rate_excavation','rate_truck',
+    'currencySymbol',
+  ];
+  const data = {};
+  fields.forEach(id => {
+    const el = document.getElementById(id);
+    if (el) data[id] = el.value;
+  });
+  return data;
+}
+
+function restoreFormInputs() {
+  const state = loadState();
+  if (!state?.formData) return;
+  for (const [id, val] of Object.entries(state.formData)) {
+    const el = document.getElementById(id);
+    if (el) el.value = val;
+  }
+  // Trigger dependent UI
+  onMixChange();
+  updateSwellFactor();
+  const bwThick = document.getElementById('bw_thickness');
+  if (bwThick) {
+    document.getElementById('bw_custom_thick_group').style.display = bwThick.value === 'custom' ? 'flex' : 'none';
+  }
+}
+
+function loadState() {
+  try {
+    const raw = localStorage.getItem('ces_state_v2');
+    if (!raw) return null;
+    const state = JSON.parse(raw);
+    if (state.theme)         APP.theme = state.theme;
+    if (state.units)         Object.assign(APP.units, state.units);
+    if (state.calcCount)     APP.calcCount = state.calcCount;
+    if (state.boqItems)      APP.boqItems = state.boqItems;
+    if (state.rates)         Object.assign(APP.rates, state.rates);
+    if (state.currencySymbol) APP.currencySymbol = state.currencySymbol;
+    return state;
+  } catch(e) { return null; }
+}
+
+function saveBOQToStorage() {
+  autoSave();
+}
+
+function resetForm(module) {
+  const fields = {
+    concrete:    ['c_length','c_width','c_depth','c_diameter'],
+    brickwork:   ['bw_length','bw_height','bw_openings'],
+    plastering:  ['pl_area','ti_area'],
+    excavation:  ['ex_length','ex_width','ex_depth'],
+  };
+  (fields[module] || []).forEach(id => {
+    const el = document.getElementById(id);
+    if (el) { el.value = ''; el.classList.remove('invalid'); }
+  });
+  document.getElementById(`res-${module}`)?.classList.remove('visible');
+  toast('Form reset', 'info');
+}
+
+// ─────────────────────────────────────────────────────────
+// PDF EXPORT — jsPDF + AutoTable
+// ─────────────────────────────────────────────────────────
+async function exportPDF() {
+  if (typeof window.jspdf === 'undefined' && typeof jsPDF === 'undefined') {
+    toast('PDF library loading... Please try again in a moment.', 'info');
+    return;
+  }
+
+  const { jsPDF } = window.jspdf || window;
+  const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
+
+  const projectName    = gs('projectName')     || 'Untitled Project';
+  const location       = gs('projectLocation') || '—';
+  const engineerName   = gs('projectEngineer') || 'Engineer Saad';
+  const now            = new Date();
+  const dateStr        = now.toLocaleDateString('en-PK', { year:'numeric', month:'long', day:'numeric' });
+  const timeStr        = now.toLocaleTimeString('en-PK', { hour:'2-digit', minute:'2-digit' });
+  const currency       = APP.currencySymbol;
+
+  const pageW = doc.internal.pageSize.getWidth();
+  const pageH = doc.internal.pageSize.getHeight();
+  const margin = 15;
+  let y = margin;
+
+  // ── HEADER BANNER ──
+  doc.setFillColor(15, 23, 42); // --bg-base dark
+  doc.rect(0, 0, pageW, 38, 'F');
+
+  // Logo circle
+  doc.setFillColor(59, 130, 246);
+  doc.circle(margin + 8, 19, 8, 'F');
+  doc.setTextColor(255, 255, 255);
+  doc.setFontSize(12);
+  doc.text('🏗', margin + 5.5, 22);
+
+  // Title
+  doc.setTextColor(255, 255, 255);
+  doc.setFontSize(16);
+  doc.setFont('helvetica', 'bold');
+  doc.text('CIVIL ESTIMATION SUITE', margin + 20, 15);
+
+  doc.setFontSize(9);
+  doc.setFont('helvetica', 'normal');
+  doc.setTextColor(148, 163, 184);
+  doc.text('Crafted with precision by Engineer Saad & Syeda Mehwish | MUST', margin + 20, 22);
+  doc.text('100% Offline | Professional BOQ & Quantity Estimation', margin + 20, 28);
+
+  // Date top-right
+  doc.setTextColor(148, 163, 184);
+  doc.setFontSize(8);
+  doc.text(`${dateStr}  ${timeStr}`, pageW - margin, 15, { align: 'right' });
+
+  y = 45;
+
+  // ── ACCENT BAR ──
+  doc.setFillColor(59, 130, 246);
+  doc.rect(margin, y, pageW - margin*2, 1.2, 'F');
+  y += 6;
+
+  // ── PROJECT INFO ──
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(13);
+  doc.setTextColor(15, 23, 42);
+  doc.text('OFFICIAL BILL OF QUANTITIES', margin, y);
+  y += 7;
+
+  doc.setFillColor(248, 250, 255);
+  doc.roundedRect(margin, y, pageW - margin*2, 24, 2, 2, 'F');
+  doc.setDrawColor(203, 213, 225);
+  doc.roundedRect(margin, y, pageW - margin*2, 24, 2, 2, 'S');
+
+  y += 6;
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(9);
+  doc.setTextColor(71, 85, 105);
+  doc.text('PROJECT NAME:', margin + 4, y);
+  doc.setFont('helvetica', 'normal');
+  doc.setTextColor(15, 23, 42);
+  doc.text(projectName, margin + 38, y);
+
+  doc.setFont('helvetica', 'bold');
+  doc.setTextColor(71, 85, 105);
+  doc.text('LOCATION:', pageW/2, y);
+  doc.setFont('helvetica', 'normal');
+  doc.setTextColor(15, 23, 42);
+  doc.text(location, pageW/2 + 22, y);
+
+  y += 7;
+  doc.setFont('helvetica', 'bold');
+  doc.setTextColor(71, 85, 105);
+  doc.text('PREPARED BY:', margin + 4, y);
+  doc.setFont('helvetica', 'normal');
+  doc.setTextColor(15, 23, 42);
+  doc.text(engineerName, margin + 38, y);
+
+  doc.setFont('helvetica', 'bold');
+  doc.setTextColor(71, 85, 105);
+  doc.text('DATE:', pageW/2, y);
+  doc.setFont('helvetica', 'normal');
+  doc.setTextColor(15, 23, 42);
+  doc.text(dateStr, pageW/2 + 22, y);
+
+  y += 14;
+
+  // ── EXECUTIVE SUMMARY ──
+  if (APP.boqItems.length > 0) {
+    const subtotal   = APP.boqItems.reduce((s, i) => s + i.qty * i.rate, 0);
+    const laborPct   = gv('laborPct')      / 100;
+    const contPct    = gv('contingencyPct')/ 100;
+    const taxPct     = gv('taxPct')        / 100;
+    const labor      = subtotal * laborPct;
+    const cont       = (subtotal + labor) * contPct;
+    const tax        = (subtotal + labor + cont) * taxPct;
+    const grand      = subtotal + labor + cont + tax;
+
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(11);
+    doc.setTextColor(15, 23, 42);
+    doc.text('EXECUTIVE SUMMARY', margin, y);
+    y += 5;
+
+    doc.setFillColor(59, 130, 246);
+    doc.rect(margin, y, pageW - margin*2, 0.8, 'F');
+    y += 5;
+
+    const summaryData = [
+      ['Material Subtotal', fmtCost(subtotal)],
+      ['Labor & Installation', fmtCost(labor)],
+      ['Contingencies', fmtCost(cont)],
+      ['GST / Tax', fmtCost(tax)],
+      ['GRAND TOTAL', fmtCost(grand)],
+    ];
+
+    doc.autoTable({
+      startY: y,
+      head: [],
+      body: summaryData,
+      theme: 'plain',
+      styles: { fontSize: 9, cellPadding: 2.5, textColor: [15,23,42] },
+      columnStyles: {
+        0: { cellWidth: 60, fontStyle: 'bold', textColor: [71,85,105] },
+        1: { halign: 'right', fontStyle: 'bold', textColor: [16,185,129] }
+      },
+      didDrawCell: (data) => {
+        if (data.row.index === summaryData.length - 1) {
+          doc.setFillColor(16, 185, 129);
+        }
+      },
+      willDrawCell: (data) => {
+        if (data.row.index === summaryData.length - 1) {
+          doc.setFillColor(16, 185, 129);
+          doc.setTextColor(255, 255, 255);
+        }
+      },
+      margin: { left: margin, right: margin },
+    });
+
+    y = doc.lastAutoTable.finalY + 8;
+  }
+
+  // ── DETAILED BOQ TABLE ──
+  if (APP.boqItems.length > 0) {
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(11);
+    doc.setTextColor(15, 23, 42);
+    doc.text('DETAILED BILL OF QUANTITIES', margin, y);
+    y += 5;
+
+    const boqHead = [['#', 'Description', 'Quantity', 'Unit', `Rate (${currency})`, `Amount (${currency})`]];
+    const boqBody = APP.boqItems.map((item, i) => [
+      i + 1,
+      item.desc,
+      fmt(item.qty, 3),
+      item.unit,
+      Math.round(item.rate).toLocaleString('en-PK'),
+      Math.round(item.qty * item.rate).toLocaleString('en-PK'),
+    ]);
+
+    const subtotal = APP.boqItems.reduce((s, i) => s + i.qty * i.rate, 0);
+    boqBody.push(['', '', '', '', 'SUBTOTAL', Math.round(subtotal).toLocaleString('en-PK')]);
+
+    doc.autoTable({
+      startY: y,
+      head: boqHead,
+      body: boqBody,
+      theme: 'grid',
+      headStyles: {
+        fillColor: [15, 23, 42],
+        textColor: [248, 250, 255],
+        fontStyle: 'bold',
+        fontSize: 9,
+        halign: 'center',
+      },
+      styles: { fontSize: 8.5, cellPadding: 2.8, overflow: 'linebreak' },
+      columnStyles: {
+        0: { cellWidth: 8,  halign: 'center' },
+        1: { cellWidth: 65 },
+        2: { cellWidth: 20, halign: 'right' },
+        3: { cellWidth: 14, halign: 'center' },
+        4: { cellWidth: 27, halign: 'right' },
+        5: { cellWidth: 27, halign: 'right', fontStyle: 'bold', textColor: [16,185,129] },
+      },
+      alternateRowStyles: { fillColor: [248, 250, 255] },
+      didParseCell: (data) => {
+        if (data.row.index === boqBody.length - 1) {
+          data.cell.styles.fillColor    = [16, 185, 129];
+          data.cell.styles.textColor    = [255, 255, 255];
+          data.cell.styles.fontStyle    = 'bold';
+        }
+      },
+      margin: { left: margin, right: margin },
+    });
+
+    y = doc.lastAutoTable.finalY + 12;
+  } else {
+    // No BOQ items — show placeholder
+    doc.setFont('helvetica', 'italic');
+    doc.setFontSize(9);
+    doc.setTextColor(148, 163, 184);
+    doc.text('No BOQ items to display. Run estimations and add items to BOQ.', margin, y);
+    y += 20;
+  }
+
+  // ── ADD NEW PAGE IF NEEDED FOR SIGN-OFF ──
+  if (y > pageH - 60) {
+    doc.addPage();
+    y = margin;
+  }
+
+  // ── SIGN-OFF BLOCK ──
+  doc.setFillColor(248, 250, 255);
+  doc.roundedRect(margin, y, pageW - margin*2, 36, 2, 2, 'F');
+  doc.setDrawColor(203, 213, 225);
+  doc.roundedRect(margin, y, pageW - margin*2, 36, 2, 2, 'S');
+
+  y += 7;
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(9);
+  doc.setTextColor(71, 85, 105);
+  doc.text('CERTIFICATION', margin + 4, y);
+  y += 5;
+  doc.setFont('helvetica', 'normal');
+  doc.setFontSize(8);
+  doc.setTextColor(15, 23, 42);
+  doc.text('This estimate has been prepared in accordance with standard engineering practices and quantity surveying norms.', margin + 4, y);
+  y += 8;
+
+  // Signature lines
+  const sigW = (pageW - margin*2 - 10) / 2;
+
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(8);
+  doc.text('Prepared by:', margin + 4, y);
+  doc.text('Verified by:', margin + 4 + sigW + 10, y);
+  y += 3;
+  doc.setDrawColor(100, 116, 139);
+  doc.line(margin + 4, y + 5, margin + 4 + sigW - 5, y + 5);
+  doc.line(margin + 4 + sigW + 10, y + 5, margin + 4 + 2*sigW + 5, y + 5);
+  y += 8;
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(8);
+  doc.setTextColor(59, 130, 246);
+  doc.text('Engineer Saad', margin + 4, y);
+  doc.setTextColor(71, 85, 105);
+  doc.text('____________________________', margin + 4 + sigW + 10, y);
+
+  // ── FOOTER ──
+  const pageCount = doc.internal.getNumberOfPages();
+  for (let i = 1; i <= pageCount; i++) {
+    doc.setPage(i);
+    doc.setFontSize(7.5);
+    doc.setTextColor(148, 163, 184);
+    doc.setFont('helvetica', 'normal');
+    doc.text(`Civil Estimation Suite  |  Generated: ${dateStr}  |  Page ${i} of ${pageCount}`, pageW/2, pageH - 8, { align: 'center' });
+    doc.setFillColor(59, 130, 246);
+    doc.rect(0, pageH - 4, pageW, 4, 'F');
+  }
+
+  // ── SAVE & EXPORT (CROSS-PLATFORM) ──
+  const fileName = `BOQ_${projectName.replace(/[^a-z0-9]/gi,'_').substring(0,30)}_${now.getFullYear()}${String(now.getMonth()+1).padStart(2,'0')}${String(now.getDate()).padStart(2,'0')}.pdf`;
+
+  // 1. Android Native App Integration (Direct to public Downloads + system chooser)
+  if (window.AndroidPDF && typeof window.AndroidPDF.saveAndOpenPdf === 'function') {
+    try {
+      const dataUri = doc.output('datauristring');
+      const base64Data = dataUri.split(',')[1];
+      const ok = window.AndroidPDF.saveAndOpenPdf(base64Data, fileName);
+      if (ok) {
+        toast(`BOQ saved to Downloads folder & opened!`, 'success');
+        return;
+      }
+    } catch(err) {
+      console.warn('Native AndroidPDF save error:', err);
+    }
+  }
+
+  // 2. Capacitor native Filesystem & Share plugin (if available)
+  if (window.Capacitor && window.Capacitor.isNativePlatform && window.Capacitor.isNativePlatform()) {
+    try {
+      const { Filesystem, Share } = window.Capacitor.Plugins || {};
+      if (Filesystem) {
+        const dataUri = doc.output('datauristring');
+        const base64Data = dataUri.split(',')[1];
+        const res = await Filesystem.writeFile({
+          path: fileName,
+          data: base64Data,
+          directory: 'CACHE',
+          recursive: true
+        });
+        if (Share && typeof Share.share === 'function') {
+          await Share.share({
+            title: fileName,
+            url: res.uri,
+            dialogTitle: 'Save / Share BOQ PDF'
+          });
+          toast(`PDF saved & ready to share!`, 'success');
+          return;
+        }
+      }
+    } catch(capErr) {
+      console.warn('Capacitor plugin save error:', capErr);
+    }
+  }
+
+  // 3. Electron Desktop App Integration
+  if (window.electronAPI && typeof window.electronAPI.savePDF === 'function') {
+    try {
+      const arrayBuffer = doc.output('arraybuffer');
+      const res = await window.electronAPI.savePDF(arrayBuffer, fileName);
+      if (res && res.success) {
+        toast(`PDF saved: ${res.filePath}`, 'success');
+        return;
+      }
+    } catch(elErr) {
+      console.warn('Electron save error:', elErr);
+    }
+  }
+
+  // 4. Standard Browser Web Download
+  try {
+    doc.save(fileName);
+    toast(`PDF exported: ${fileName}`, 'success');
+  } catch(e) {
+    const blob = doc.output('blob');
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = fileName;
+    document.body.appendChild(a);
+    a.click();
+    setTimeout(() => { document.body.removeChild(a); URL.revokeObjectURL(url); }, 2000);
+    toast(`PDF download started: ${fileName}`, 'success');
+  }
+}
+
+// ─────────────────────────────────────────────────────────
+// MEMBER TYPE SHAPE TOGGLE
+// ─────────────────────────────────────────────────────────
+document.getElementById('c_memberType').addEventListener('change', function() {
+  const isCircular = this.value.includes('circular');
+  document.getElementById('c_l_group').style.display = isCircular ? 'none' : 'flex';
+  document.getElementById('c_w_group').style.display = isCircular ? 'none' : 'flex';
+  document.getElementById('c_d_group').style.display = isCircular ? 'flex' : 'none';
+  autoSave();
+});
+
+// ─────────────────────────────────────────────────────────
+// KEYBOARD SHORTCUTS
+// ─────────────────────────────────────────────────────────
+document.addEventListener('keydown', e => {
+  if ((e.ctrlKey || e.metaKey) && e.key === 'p') {
+    e.preventDefault();
+    exportPDF();
+  }
+  if (e.key === 'Escape') {
+    document.querySelectorAll('.modal-overlay').forEach(m => m.classList.remove('active'));
+  }
+});
+
+// ─────────────────────────────────────────────────────────
+// SERVICE WORKER REGISTRATION
+// ─────────────────────────────────────────────────────────
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('./sw.js')
+      .then(reg => console.log('[PWA] Service Worker registered:', reg.scope))
+      .catch(err => console.warn('[PWA] SW registration failed:', err));
+  });
+}
+
+</script>
+</body>
+</html>
